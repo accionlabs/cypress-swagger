@@ -1,0 +1,18 @@
+export const openAPISpec = {
+	swaggerParsedObject: {},
+	SwaggerPathArrObject: [],
+	tagFolders: [],
+	paramFixtureFileNames: [],
+	requestFixtureBodyFileNames: [],
+	paramTypesArrObjects: [],
+	allRequestAndResponseCombinationsArrObjects: [],
+	paramAndRequestAndResponse: [],
+	responseCombinations: [],
+	allURLCombinations: [],
+	onlyResponseCombinations: [],
+	onlyResponseCombinationsFileNames: [],
+	security: [],
+	securitySchemes: [],
+	securityAtPathLevelObject: [],
+	baseApiURL: "",
+};
