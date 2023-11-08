@@ -345,6 +345,13 @@ export function getFixtureObjectForPath(operationId) {
 		}
 	);
 
+	let paramAndResponseCombinationsList = filter(
+		openAPISpec.paramAndResponseTypedArray,
+		{
+			operationId: operationId,
+		}
+	);
+
 	return paramList.length > 0
 		? { data: paramList, type: "param" }
 		: requestBodyList.length > 0
@@ -353,7 +360,7 @@ export function getFixtureObjectForPath(operationId) {
 		? { data: paramRequestAndResponseList, type: "paramRequestAndResponse" }
 		: onlyResponseCombinationsList.length > 0
 		? { data: onlyResponseCombinationsList, type: "onlyResponseCombinations" }
-		: { data: undefined, type: undefined };
+		: paramAndResponseCombinationsList.length > 0 ? { data: paramAndResponseCombinationsList, type: "paramAndResponse" } :{ data: undefined, type: undefined };
 }
 
 export function setPathParamAndRequestAndResponseMergedObjects() {
@@ -396,12 +403,14 @@ export function setPathParamAndRequestAndResponseMergedObjects() {
 
 export function mergeParamAndResponseCombinations() {
 	let paramAndResponseCombinations = [];
-	openAPISpec.paramTypesArrObjects.forEach((param) => {
-		openAPISpec.responseCombinations.forEach((responseCombination) => {
+	let operationIds = [];
+	openAPISpec.responseCombinations.forEach((param) => {
+		openAPISpec.paramTypesArrObjects.forEach((responseCombination) => {
 			if (param.operationId === responseCombination.operationId) {
 				paramAndResponseCombinations.push(
 					getMergedObjects(param, responseCombination)
 				);
+				operationIds.push(param.operationId);
 			}
 		});
 	});
@@ -410,6 +419,14 @@ export function mergeParamAndResponseCombinations() {
 		paramAndResponseCombinations,
 		isEqual()
 	);
+
+	openAPISpec.paramTypesArrObjects = reject(
+		openAPISpec.paramTypesArrObjects,
+		(item) => {
+			return operationIds.indexOf(item.operationId) > -1;
+		}
+	);
+
 	return paramAndResponseCombinations;
 }
 
@@ -428,7 +445,13 @@ export function getOnlyResponseCombinations() {
 		}
 	);
 
-	let paramTypeAndResponses = openAPISpec.paramTypesArrObjects.map(
+	let paramAndRequestAndResponseOperationId = openAPISpec.paramAndRequestAndResponse.map(
+		(combination) => {
+			return combination.operationId;
+		}
+	);
+
+	let paramAndResponseOperationId = openAPISpec.paramAndResponseTypedArray.map(
 		(combination) => {
 			return combination.operationId;
 		}
@@ -437,7 +460,8 @@ export function getOnlyResponseCombinations() {
 	allOperationsId = [
 		...requestAndResponseoperationId,
 		...paramTypesoperationId,
-		...paramTypeAndResponses,
+		...paramAndRequestAndResponseOperationId,
+		...paramAndResponseOperationId
 	];
 
 	allOperationsId = [...new Set(allOperationsId)];
@@ -448,6 +472,7 @@ export function getOnlyResponseCombinations() {
 		}
 	);
 }
+
 
 export function getSecurityAtPathLevelOrGlobalLevel(param) {
 	let securityObject = openAPISpec.securityAtPathLevelObject.filter(

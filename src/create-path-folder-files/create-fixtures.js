@@ -39,7 +39,7 @@ export function createDataToSetInFixtureFile() {
 	openAPISpec.allRequestAndResponseCombinationsArrObjects =
 		allRequestAndResponseCombinationsArrObjects;
 	setPathParamAndRequestAndResponseMergedObjects();
-	openAPISpec.paramTypesArrObjects = mergeParamAndResponseCombinations();
+	openAPISpec.paramAndResponseTypedArray = mergeParamAndResponseCombinations();
 	getOnlyResponseCombinations();
 	changeDirectory(constants.fixtureDirPath);
 	createFixtureFiles();
@@ -49,7 +49,8 @@ export function createFixtureFiles() {
 	let fileName;
 	let requestBodyFileNames = [],
 		paramRequestAndResponseFileNames = [],
-		onlyResponseCombinationsFileNames = [];
+		onlyResponseCombinationsFileNames = [],
+		paramAndResponseFileNames = [];
 	openAPISpec.paramTypesArrObjects.forEach(async (param, index) => {
 		fileName =
 			param.operationId != undefined
@@ -88,7 +89,7 @@ export function createFixtureFiles() {
 				requestAndResponse.operationId
 					? requestAndResponse.operationId
 					: concatFileName(requestAndResponse.apiEndpoint)
-			}.json`;
+			}`;
 
 			let statusCodeWiseValue =
 				requestAndResponse.statusCodes.indexOf(
@@ -99,7 +100,7 @@ export function createFixtureFiles() {
 					? requestAndResponse.customCreatedExample
 					: "";
 
-			let data = JSON.stringify({
+			let data = {
 				headers: {
 					"Content-Type": requestAndResponse.contentType,
 					accept: requestAndResponse.responseContentType,
@@ -107,13 +108,14 @@ export function createFixtureFiles() {
 				payload: statusCodeWiseValue,
 				responseStatusCode: requestAndResponse.responseStatusCode,
 				responseValue: requestAndResponse.responseValue,
-			});
+				responseSchema : requestAndResponse.responseSchema ? requestAndResponse.responseSchema : ""
+			};
 
 			openAPISpec.allRequestAndResponseCombinationsArrObjects[
 				index
 			].fixtureFileName = fileName;
 			requestBodyFileNames.push(fileName);
-			await writeFile(fileName, data);
+			await writeFile(`${fileName}.json`, customStringify(data));
 		}
 	);
 	openAPISpec.requestFixtureBodyFileNames = requestBodyFileNames;
@@ -125,14 +127,12 @@ export function createFixtureFiles() {
 				: "";
 			let paramTypes = [];
 			let data = {};
-			let securitySchema = getSecurityAtPathLevelOrGlobalLevel(
-				paramRequestAndResponse
-			);
-
+			let securitySchema = getSecurityAtPathLevelOrGlobalLevel(paramRequestAndResponse);
 			let securityHeaders =
 				securitySchema != "" && Object.keys(securitySchema).length > 0
 					? getSecurityHeaderWithSchma(securitySchema)
 					: "";
+			
 			paramKeys.forEach((keys) => {
 				if (
 					keys == "pathParam" ||
@@ -162,7 +162,7 @@ export function createFixtureFiles() {
 				paramRequestAndResponse.operationId
 					? paramRequestAndResponse.operationId
 					: concatFileName(paramRequestAndResponse.apiEndpoint)
-			}.json`;
+			}`;
 
 			openAPISpec.paramAndRequestAndResponse[index].fixtureFileName = fileName;
 			let fixtureObject = {
@@ -176,6 +176,7 @@ export function createFixtureFiles() {
 					: "",
 				responseStatusCode: paramRequestAndResponse.responseStatusCode,
 				responseValue: paramRequestAndResponse.responseValue,
+				responseSchema : paramRequestAndResponse.responseSchema ? paramRequestAndResponse.responseSchema : ""
 			};
 			paramTypes.forEach((type) => {
 				fixtureObject[type] = {};
@@ -194,7 +195,7 @@ export function createFixtureFiles() {
 			});
 			fixtureObject = addSecurityHeaders(securityHeaders, fixtureObject);
 			data = customStringify(fixtureObject);
-			await writeFile(fileName, data);
+			await writeFile(`${fileName}.json`, data);
 		}
 	);
 	openAPISpec.paramRequestAndResponseFileNames =
@@ -213,25 +214,114 @@ export function createFixtureFiles() {
 				responseCombinationOnly.operationId
 					? responseCombinationOnly.operationId
 					: concatFileName(responseCombinationOnly.apiEndpoint)
-			}.json`;
+			}`;
 
-			let data = JSON.stringify({
+			let securitySchema = getSecurityAtPathLevelOrGlobalLevel(responseCombinationOnly);
+			let securityHeaders =
+				securitySchema != "" && Object.keys(securitySchema).length > 0
+					? getSecurityHeaderWithSchma(securitySchema)
+					: "";
+
+			let data = {
 				headers: {
 					"Content-Type": responseCombinationOnly.contentType,
 					accept: responseCombinationOnly.responseContentType,
 				},
 				responseStatusCode: responseCombinationOnly.responseStatusCode,
 				responseValue: responseCombinationOnly.responseValue,
-			});
+				responseSchema : responseCombinationOnly.responseSchema ? responseCombinationOnly.responseSchema : ""
+			};
 
+			data = addSecurityHeaders(securityHeaders, data);
+			 
 			openAPISpec.onlyResponseCombinations[index].fixtureFileName = fileName;
 			onlyResponseCombinationsFileNames.push(fileName);
-			await writeFile(fileName, data);
+			await writeFile(`${fileName}.json`, customStringify(data));
 		}
 	);
 
 	openAPISpec.onlyResponseCombinationsFileNames =
 		onlyResponseCombinationsFileNames;
+
+	openAPISpec.paramAndResponseTypedArray.forEach(
+		async (paramAndResponse, index) => {
+			let paramKeys = paramAndResponse
+				? Object.keys(paramAndResponse)
+				: "";
+			let paramTypes = [];
+			let data = {};
+			let securitySchema = getSecurityAtPathLevelOrGlobalLevel(paramAndResponse);
+			let securityHeaders =
+				securitySchema != "" && Object.keys(securitySchema).length > 0
+					? getSecurityHeaderWithSchma(securitySchema)
+					: "";
+			
+			paramKeys.forEach((keys) => {
+				if (
+					keys == "pathParam" ||
+					keys == "queryParam" ||
+					keys == "cookie" ||
+					keys == "header"
+				) {
+					paramTypes.push(keys);
+				}
+			});
+		
+			let requestContentType = paramAndResponse.contentType
+				? paramAndResponse.contentType
+						.replace("/", "_")
+						.replaceAll("*", "")
+				: "";
+			let responseContentType = paramAndResponse.responseContentType
+				? paramAndResponse.responseContentType
+						.replace("/", "_")
+						.replaceAll("*", "")
+				: "";
+			let fileName = `${
+				paramAndResponse.responseStatusCode
+					? paramAndResponse.responseStatusCode
+					: "default"
+			}_${responseContentType}_${requestContentType}_${
+				paramAndResponse.operationId
+					? paramAndResponse.operationId
+					: concatFileName(paramAndResponse.apiEndpoint)
+			}`;
+		
+			openAPISpec.paramAndResponseTypedArray[index].fixtureFileName = fileName;
+			let fixtureObject = {
+				headers: {
+					"Content-Type": paramAndResponse.contentType,
+					accept: paramAndResponse.responseContentType,
+					header: "",
+				},
+				responseStatusCode: paramAndResponse.responseStatusCode,
+				responseValue: paramAndResponse.responseValue,
+				responseSchema : paramAndResponse.responseSchema ? paramAndResponse.responseSchema : ""
+			};
+			paramTypes.forEach((type) => {
+				fixtureObject[type] = {};
+				paramAndResponse[type].forEach(async (param) => {
+					if (param.type == "header") {
+						fixtureObject.headers.header = param.example
+							? param.example
+							: createExampleUsingSchema(param.schema);
+					} else {
+						fixtureObject[type][param.name] = param.example
+							? param.example
+							: createExampleUsingSchema(param.schema);
+					}
+					paramAndResponseFileNames.push(fileName);
+				});
+			});
+			fixtureObject = addSecurityHeaders(securityHeaders, fixtureObject);
+			data = customStringify(fixtureObject);
+			await writeFile(`${fileName}.json`, data);
+		}
+	);
+	openAPISpec.paramAndResponseFileNames =
+		paramAndResponseFileNames;
+
+
 }
 
 export function writeFixtureParam(param, fileName, parentIndex, paramTypes) {
@@ -241,6 +331,8 @@ export function writeFixtureParam(param, fileName, parentIndex, paramTypes) {
 		securitySchema != "" && Object.keys(securitySchema).length > 0
 			? getSecurityHeaderWithSchma(securitySchema)
 			: "";
+
+			
 
 	let fixtureFileData = {
 		headers: {},
@@ -271,8 +363,11 @@ export function writeFixtureParam(param, fileName, parentIndex, paramTypes) {
 		});
 	});
 
-	fixtureFileData = addSecurityHeaders(securityHeaders, fixtureFileData);
 
+	
+
+	fixtureFileData = addSecurityHeaders(securityHeaders, fixtureFileData);
+	
 	paramFileNames.push(fileName);
 	openAPISpec.paramTypesArrObjects[parentIndex].fixtureFileName = fileName;
 
@@ -302,8 +397,8 @@ function addSecurityHeaders(securityHeaders, fixtureFileData) {
 	if (securityHeaders != "") {
 		switch (securityHeaders.in) {
 			case "header":
-				fixtureFileData.headers = securityHeaders.security;
-				fixtureFileData.headers["header"] = "";
+				fixtureFileData.headers = {...fixtureFileData.headers,...securityHeaders.security} ;
+				// fixtureFileData.headers["header"] = "";
 				break;
 
 			case "query":

@@ -81,7 +81,6 @@ export function getItTestCases(fixtureObjectsList, type, itSyntax) {
 				}
 			}`;
 	let cookieSyntax = `requestInfo.cookies = fixtureResponse.cookie ? fixtureResponse.cookie : "";`;
-
 	switch (type) {
 		case "requestBody":
 			fixtureObjectsList.forEach((combination) => {
@@ -137,6 +136,25 @@ export function getItTestCases(fixtureObjectsList, type, itSyntax) {
 			});
 			break;
 
+		case "paramAndResponse":
+			fixtureObjectsList.forEach((combination) => {
+				let fixtureFileName = combination.fixtureFileName;
+				let fixtureSyntax = `cy.fixture("${fixtureFileName}").then((fixtureResponse) => {`;
+
+				itTestBlock += `${itSyntax}
+																	${fixtureSyntax}
+																		${requestBodySyntax}
+																		${requestHeaderSyntax}
+																		${combination.pathParam ? pathParamSyntax : "\n"}
+																		${combination.queryParam ? queryParamSyntax : "\n"}
+																		${combination.cookie ? cookieSyntax : "\n"}
+																			${apiRequestCodeBlock}
+																	});
+																});
+															`;
+			});
+			break;
+	
 		case "onlyResponseCombinations":
 			fixtureObjectsList.forEach((responseCombinationOnly) => {
 				let fixtureFileName = responseCombinationOnly.fixtureFileName;
