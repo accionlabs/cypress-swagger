@@ -6,6 +6,20 @@ export const constants = {
 	cypressFoldersName: ["downloads", "e2e", "fixtures", "support"],
 	cypressParentDirectory: ".",
 	fixtureDirPath: "../../fixtures",
+    contentTypesSupportsFileUploadAndDownload : [
+                                                    "application/octet-stream",
+                                                    "application/pdf",
+                                                    "application/zip",
+                                                    "application/gzip",
+                                                    "application/vnd.mycompany.myapp.v2+json",
+                                                    "application/vnd.ms-excel",
+                                                    "application/vnd.openstreetmap.data+xml",
+                                                    "Application/msword",
+                                                    "image/png",
+                                                    "image/jpeg",
+                                                    "image/gif",
+                                                    "image/bmp"
+                                                ],
 	pretteierPackage: "npm install --save-dev --save-exact prettier",
 	pretterierFormatAllFiles: "npx prettier . --write",
 	pretteierConfig: `  { "trailingComma": "es5", 
@@ -30,7 +44,8 @@ export const constants = {
                             supportFile: false,
                             screenshotOnRunFailure : false,
                             env : {
-                                CYPRESS_BASE_URL : 'CYPRESS_BASE_URL_PLACEHOLDER'
+                                CYPRESS_BASE_URL : 'CYPRESS_BASE_URL_PLACEHOLDER',
+                                fileuploadContentTypes : 'PLACEHOLDER_CONTENT_TYPES'
                             }
                         },
                     }) `,

@@ -8,6 +8,7 @@ export function createConfigFile() {
 		"CYPRESS_BASE_URL_PLACEHOLDER",
 		openAPISpec.baseApiURL
 	);
+	
 	writeFile("cypress.config.js", configContent);
 	console.log(`cypress.config.js created successfully.`);
 }

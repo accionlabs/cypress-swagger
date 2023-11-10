@@ -68,10 +68,11 @@ export function getItTestCases(fixtureObjectsList, type, itSyntax) {
 												expect(isValid).to.be.true;
 										}
 								});`;
-	let requestBodySyntax = `requestInfo.body = fixtureResponse.payload ? fixtureResponse.payload
-			: "";`;
+	
 	let requestHeaderSyntax = `requestInfo.headers = fixtureResponse.headers ? fixtureResponse.headers
 			: "" ;`;
+	let requestBodySyntax = `requestInfo.body = fixtureResponse.payload ? fixtureResponse.payload
+	: "";`;
 	let queryParamSyntax = `requestInfo.qs = fixtureResponse.queryParam ? fixtureResponse.queryParam : "";`;
 	let pathParamSyntax = `let pathParams = fixtureResponse.pathParam ? fixtureResponse.pathParam : "";											
 			for (const key in pathParams) {
@@ -81,19 +82,33 @@ export function getItTestCases(fixtureObjectsList, type, itSyntax) {
 				}
 			}`;
 	let cookieSyntax = `requestInfo.cookies = fixtureResponse.cookie ? fixtureResponse.cookie : "";`;
+
+	let fixtureSyntaxForFileUpload = `cy.fixture('**filePath**').then((fileContent) => {`;
+	let requestBodySyntaxForFileUpload = `requestInfo.body = fileContent ? fileContent
+	: "";`;
+	let requestBodySyntaxForFileUploadForMultipartFormData = `const blob = new Blob([fileContent],{type : requestInfo.headers["Content-Type"]});
+												const formData = new FormData();
+												formData.append('file', blob);
+												requestInfo.body = formData;`;
+	
 	switch (type) {
 		case "requestBody":
 			fixtureObjectsList.forEach((combination) => {
 				let fixtureFileName = combination.fixtureFileName;
+				let fileUploadOtherContentTypes = constants.contentTypesSupportsFileUploadAndDownload.indexOf(combination.contentType) > -1 ; 
+				let fileUploadMultipartFormDataFlag = combination.contentType == "multipart/form-data" ; 
 				let fixtureSyntax = `cy.fixture("${fixtureFileName}").then((fixtureResponse) => {`;
+				
 				itTestBlock += `
 					${itSyntax}
              ${fixtureSyntax}
-                ${requestBodySyntax}
-                ${requestHeaderSyntax}
-								${apiRequestCodeBlock}
+				${ fileUploadOtherContentTypes || fileUploadMultipartFormDataFlag ? fixtureSyntaxForFileUpload : "\n" }
+				${requestHeaderSyntax}
+                ${fileUploadOtherContentTypes ? requestBodySyntaxForFileUpload : fileUploadMultipartFormDataFlag ? requestBodySyntaxForFileUploadForMultipartFormData :  requestBodySyntax }
+				${apiRequestCodeBlock}
             });
 					});
+					${ fileUploadOtherContentTypes || fileUploadMultipartFormDataFlag ? "})" : "\n" }		
           `;
 			});
 			break;
@@ -121,10 +136,13 @@ export function getItTestCases(fixtureObjectsList, type, itSyntax) {
 			fixtureObjectsList.forEach((combination) => {
 				let fixtureFileName = combination.fixtureFileName;
 				let fixtureSyntax = `cy.fixture("${fixtureFileName}").then((fixtureResponse) => {`;
+				let fileUploadOtherContentTypes = constants.contentTypesSupportsFileUploadAndDownload.indexOf(combination.contentType) > -1 ; 
+				let fileUploadMultipartFormDataFlag = combination.contentType == "multipart/form-data" ; 
 
 				itTestBlock += `${itSyntax}
 																	${fixtureSyntax}
-																		${requestBodySyntax}
+																	${ fileUploadOtherContentTypes || fileUploadMultipartFormDataFlag ? fixtureSyntaxForFileUpload : "\n" }
+																	${fileUploadOtherContentTypes ? requestBodySyntaxForFileUpload : fileUploadMultipartFormDataFlag ? requestBodySyntaxForFileUploadForMultipartFormData :  requestBodySyntax }
 																		${requestHeaderSyntax}
 																		${combination.pathParam ? pathParamSyntax : "\n"}
 																		${combination.queryParam ? queryParamSyntax : "\n"}
@@ -132,6 +150,7 @@ export function getItTestCases(fixtureObjectsList, type, itSyntax) {
 																			${apiRequestCodeBlock}
 																	});
 																});
+																${ fileUploadOtherContentTypes || fileUploadMultipartFormDataFlag ? "})" : "\n" }
 															`;
 			});
 			break;
