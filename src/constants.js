@@ -6,6 +6,9 @@ export const constants = {
 	cypressFoldersName: ["downloads", "e2e", "fixtures", "support"],
 	cypressParentDirectory: ".",
 	fixtureDirPath: "../../fixtures",
+    cypressRunAndGenerateReportCommand : { "generate-merge-report" : "npx cypress run --reporter mochawesome \
+    --reporter-options reportDir='cypress/results',overwrite=false,html=false,json=true && npx mochawesome-merge 'cypress/results/*.json' > mochawesome.json"},
+    cypressRunCommand : "npx cypress run",
     contentTypesSupportsFileUploadAndDownload : [
                                                     "application/octet-stream",
                                                     "application/pdf",
@@ -21,6 +24,7 @@ export const constants = {
                                                     "image/bmp"
                                                 ],
 	pretteierPackage: "npm install --save-dev --save-exact prettier",
+    reportingPackages : "npm install --save-dev mochawesome mochawesome-merge mochawesome-report-generator",
 	pretterierFormatAllFiles: "npx prettier . --write",
 	pretteierConfig: `  { "trailingComma": "es5", 
                             "tabWidth": 4, 
