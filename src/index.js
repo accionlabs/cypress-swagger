@@ -1,3 +1,3 @@
 import { initiateSwaggerToCypress } from "./set-data-and-validation/setDataAndValidate.js";
 let args = process.argv.splice(2);
-initiateSwaggerToCypress(args);
+await initiateSwaggerToCypress(args);

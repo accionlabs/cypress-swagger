@@ -1,8 +1,8 @@
 import { constants } from "../constants.js";
 import { writeFile } from "../util.js";
 
-export function createReportConfig() {
+export async function createReportConfig() {
 	const reportContent = constants.reportConfig;
-	writeFile("report-config.json", reportContent);
+	await writeFile("report-config.json", reportContent);
 	console.log(`report-config.json created successfully.`);
 }

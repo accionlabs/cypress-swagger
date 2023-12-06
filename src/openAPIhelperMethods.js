@@ -35,7 +35,7 @@ export function convertPathIntoArrayOfObjects(obj, keyAs) {
 	);
 }
 
-export function flattenPathObject(arrObj) {
+export async function flattenPathObject(arrObj) {
 	let flattenObj = [];
 	arrObj.forEach((path) => {
 		let methodNames = Object.keys(path);
@@ -51,7 +51,7 @@ export function flattenPathObject(arrObj) {
 	return flattenObj;
 }
 
-export function getTagsFolders(paths) {
+export async function getTagsFolders(paths) {
 	let tags = [];
 	if (paths != undefined)
 		paths.forEach((path) => {
@@ -67,14 +67,14 @@ export function getTagsFolders(paths) {
 	return uniq(tags);
 }
 
-export function getOperationsForTag(tag) {
+export async function getOperationsForTag(tag) {
 	let operations = filter(openAPISpec.SwaggerPathArrObject, {
 		tags: [`${tag}`],
 	});
 	return operations.length > 0 ? operations : [];
 }
 
-export function getParamTypeFromPathObject(parameters) {
+export async function getParamTypeFromPathObject(parameters) {
 	let pathParamArrObj = [],
 		queryParamArrObj = [],
 		cookieArrObj = [],
@@ -82,7 +82,7 @@ export function getParamTypeFromPathObject(parameters) {
 		payloadObj = {};
 
 	if (parameters != undefined) {
-		parameters.forEach((param) => {
+		parameters.forEach(async (param) => {
 			let obj = {};
 			switch (param.in) {
 				case "path":
@@ -115,7 +115,7 @@ export function compactObject(obj) {
 	return compact(obj);
 }
 
-export function setValuesInPayloadObject(obj, param) {
+export async function setValuesInPayloadObject(obj, param) {
 	obj.type = param.in;
 	obj.name = param.name ? param.name : undefined;
 	obj.schema = param.schema ? param.schema : undefined;
@@ -161,11 +161,11 @@ export function getMergedObjects(requestBodyObj, responseObj) {
 	return merge(requestBodyObj, responseObj);
 }
 
-export function mergeArrayOfObjects(originalArray, newArray) {
+export async function mergeArrayOfObjects(originalArray, newArray) {
 	return concat(originalArray, newArray);
 }
 
-export function getAllCombinationsForRequestbodyAndResponse(path) {
+export async function getAllCombinationsForRequestbodyAndResponse(path) {
 	let requestBody = path.requestBody ? path.requestBody : undefined;
 	let response = path.responses ? path.responses : undefined;
 	let multipleCombinationsArrObj = [],
@@ -174,7 +174,7 @@ export function getAllCombinationsForRequestbodyAndResponse(path) {
 
 	if (requestBody && requestBody.content) {
 		const requestContentTypes = Object.keys(requestBody.content);
-		requestContentTypes.forEach((contentType) => {
+		requestContentTypes.forEach(async (contentType) => {
 			let currentCombination = {};
 			currentCombination.operationId = path.operationId;
 			currentCombination.description = path.description ? path.description : "";
@@ -190,7 +190,7 @@ export function getAllCombinationsForRequestbodyAndResponse(path) {
 					: undefined;
 			currentCombination.statusCodes =
 				requestBodyExamplesKeys != undefined &&
-				requestBodyExamplesKeys.length != 0
+					requestBodyExamplesKeys.length != 0
 					? requestBodyExamplesKeys
 					: [];
 			if (
@@ -201,18 +201,18 @@ export function getAllCombinationsForRequestbodyAndResponse(path) {
 					currentCombination = JSON.parse(JSON.stringify(currentCombination));
 					currentCombination[key] =
 						requestBody.content[contentType].examples &&
-						requestBody.content[contentType].examples[key] &&
-						requestBody.content[contentType].examples[key].value
+							requestBody.content[contentType].examples[key] &&
+							requestBody.content[contentType].examples[key].value
 							? requestBody.content[contentType].examples[key].value
 							: contentType == "application/xml"
-							? createXmlExampleUsingSchema(
+								? createXmlExampleUsingSchema(
 									requestBody.content[contentType].schema
-							  )
-							: contentType != "multipart/form-data"
-							? createExampleUsingSchema(
-									requestBody.content[contentType].schema
-							  )
-							: "";
+								)
+								: contentType != "multipart/form-data"
+									? createExampleUsingSchema(
+										requestBody.content[contentType].schema
+									)
+									: "";
 				});
 			}
 
@@ -220,8 +220,8 @@ export function getAllCombinationsForRequestbodyAndResponse(path) {
 				currentCombination.customCreatedExample =
 					contentType == "application/xml"
 						? createXmlExampleUsingSchema(
-								requestBody.content[contentType].schema
-						  )
+							requestBody.content[contentType].schema
+						)
 						: createExampleUsingSchema(requestBody.content[contentType].schema);
 			}
 			multipleCombinationsArrObj.push(currentCombination);
@@ -270,11 +270,11 @@ export function getAllCombinationsForRequestbodyAndResponse(path) {
 		}
 	}
 
-	responseCombinations.forEach((responseCombination) => {
+	responseCombinations.forEach(async (responseCombination) => {
 		openAPISpec.responseCombinations.push(responseCombination);
 	});
 
-	responseCombinations.forEach((responseCombination) => {
+	responseCombinations.forEach(async (responseCombination) => {
 		multipleCombinationsArrObj.forEach((requestBodyObj) => {
 			if (responseCombination.operationId == requestBodyObj.operationId) {
 				allCombinations.push(
@@ -319,7 +319,7 @@ export function createXmlExampleUsingSchema(jsonSchema) {
 	return xmlString;
 }
 
-export function getFixtureObjectForPath(operationId) {
+export async function getFixtureObjectForPath(operationId) {
 	let paramList = filter(openAPISpec.paramTypesArrObjects, {
 		operationId: operationId,
 	});
@@ -355,15 +355,15 @@ export function getFixtureObjectForPath(operationId) {
 	return paramList.length > 0
 		? { data: paramList, type: "param" }
 		: requestBodyList.length > 0
-		? { data: requestBodyList, type: "requestBody" }
-		: paramRequestAndResponseList.length > 0
-		? { data: paramRequestAndResponseList, type: "paramRequestAndResponse" }
-		: onlyResponseCombinationsList.length > 0
-		? { data: onlyResponseCombinationsList, type: "onlyResponseCombinations" }
-		: paramAndResponseCombinationsList.length > 0 ? { data: paramAndResponseCombinationsList, type: "paramAndResponse" } :{ data: undefined, type: undefined };
+			? { data: requestBodyList, type: "requestBody" }
+			: paramRequestAndResponseList.length > 0
+				? { data: paramRequestAndResponseList, type: "paramRequestAndResponse" }
+				: onlyResponseCombinationsList.length > 0
+					? { data: onlyResponseCombinationsList, type: "onlyResponseCombinations" }
+					: paramAndResponseCombinationsList.length > 0 ? { data: paramAndResponseCombinationsList, type: "paramAndResponse" } : { data: undefined, type: undefined };
 }
 
-export function setPathParamAndRequestAndResponseMergedObjects() {
+export async function setPathParamAndRequestAndResponseMergedObjects() {
 	let operationIds = [];
 
 	openAPISpec.paramTypesArrObjects.forEach((param) => {
@@ -401,7 +401,7 @@ export function setPathParamAndRequestAndResponseMergedObjects() {
 	);
 }
 
-export function mergeParamAndResponseCombinations() {
+export async function mergeParamAndResponseCombinations() {
 	let paramAndResponseCombinations = [];
 	let operationIds = [];
 	openAPISpec.responseCombinations.forEach((param) => {
@@ -430,7 +430,7 @@ export function mergeParamAndResponseCombinations() {
 	return paramAndResponseCombinations;
 }
 
-export function getOnlyResponseCombinations() {
+export async function getOnlyResponseCombinations() {
 	let allOperationsId;
 	let requestAndResponseoperationId =
 		openAPISpec.allRequestAndResponseCombinationsArrObjects.map(
@@ -527,3 +527,38 @@ export function getSecurityHeaderWithSchma(securitySchema) {
 	}
 	return AuthHeader;
 }
+
+export function customStringify(obj, replacer = null, space = 2) {
+	const seen = new WeakSet();
+	return JSON.stringify(
+		obj,
+		function (key, value) {
+			if (typeof value === "object" && value !== null) {
+				if (seen.has(value)) {
+					// Circular reference found, return a placeholder or skip it
+					return "[Circular]";
+				}
+				seen.add(value);
+			}
+			return replacer ? replacer(key, value) : value;
+		},
+		space
+	);
+}
+
+export async function filterOutJSONBasedOnUpdateOptions(currentPathArrObject, options) {
+	currentPathArrObject = filter(
+		currentPathArrObject,
+		(path) => {
+
+			return options.some((option) => {
+				if (path.operationId == option?.operationId || (path.tags == option.tags && option.methods.indexOf(path.methodName) > -1 && option.apiEndpoint == path.apiEndpoint)) {
+					path["operation"] = option.operation
+				}
+				return path.operationId == option?.operationId || (path.tags == option.tags && option.methods.indexOf(path.methodName) > -1 && option.apiEndpoint == path.apiEndpoint)
+			});
+		}
+	);
+	return currentPathArrObject;
+}
+

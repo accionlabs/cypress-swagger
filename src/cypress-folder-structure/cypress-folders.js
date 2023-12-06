@@ -14,17 +14,17 @@ import { createReportConfig } from "./cypress-report-config.js";
 import path from 'path';
 import fs from "fs";
 
-export function createFolders(folders, parentDirectory) {
-	folders.forEach((folderName) => {
+export async function createFolders(folders, parentDirectory) {
+	folders.forEach(async (folderName) => {
 		const folderPath = `${parentDirectory}/${folderName}`;
-		createDirectory(folderPath, { recursive: true });
+		await createDirectory(folderPath, { recursive: true });
 		console.log(`Folder ${folderPath} created successfully.`);
 	});
 }
 
 export async function createCypressFolderStructure() {
 	try {
-		if (!checkIfFolderExists(constants.projectPath)) {
+		if (!await checkIfFolderExists(constants.projectPath)) {
 			await createDirectory(constants.projectPath);
 			await changeDirectory(constants.projectPath);
 			await executeCommandInCli(constants.npmPackage, { stdio: "inherit" });
@@ -37,7 +37,7 @@ export async function createCypressFolderStructure() {
 				stdio: "inherit",
 			});
 			await writeFile(".prettierrc.json", constants.pretteierConfig);
-			const packageJsonPath = path.join(process.cwd(), 'package.json'); 
+			const packageJsonPath = path.join(process.cwd(), 'package.json');
 			await readAndWriteFile(packageJsonPath);
 			console.log(`Cypress project initialized successfully `);
 			await createDirectory("cypress");
@@ -56,8 +56,7 @@ export async function createCypressFolderStructure() {
 			await changeDirectory("API_TESTING");
 			await createFilesAndFoldersForTagsAndOperations();
 		} else {
-			console.log("Folder is already created with name is given in arguments.");
-			process.exit(0);
+			await createFilesAndFoldersForTagsAndOperations();
 		}
 	} catch (err) {
 		console.log("something went wrong while creating folder.");
@@ -66,7 +65,7 @@ export async function createCypressFolderStructure() {
 }
 
 
-async function readAndWriteFile(packageJsonPath){
+async function readAndWriteFile(packageJsonPath) {
 	fs.readFile(packageJsonPath, 'utf8', (err, data) => {
 		if (err) {
 			console.error('Error reading package.json:', err);
@@ -75,13 +74,13 @@ async function readAndWriteFile(packageJsonPath){
 		let reportRun = constants.cypressRunAndGenerateReportCommand;
 		// Parse the JSON content
 		const packageJson = JSON.parse(data);
-	
+
 		// Edit the package.json as needed
 		packageJson.scripts.test = constants.cypressRunCommand; // Example: Adding a new dependency
-		packageJson.scripts = {...reportRun,...packageJson.scripts};
+		packageJson.scripts = { ...reportRun, ...packageJson.scripts };
 		// Convert the modified object back to JSON
 		const updatedPackageJson = JSON.stringify(packageJson, null, 2); // The third argument (2) is the number of spaces to use for indentation
-	
+
 		// Write the updated content back to package.json
 		fs.writeFile(packageJsonPath, updatedPackageJson, 'utf8', (err) => {
 			if (err) {

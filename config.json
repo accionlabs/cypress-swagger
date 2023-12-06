@@ -1,0 +1,62 @@
+{
+  "swaggerPathFile": "C:\\Swagger Test File\\swagger-20231108T103321Z-001\\swagger\\UPDATE_DEL_DEP_CREATE.json",
+  "swaggerOutputFilePath": "C:\\Swagger-outputs\\output135",
+  "serverUrl": "https://petstore.swagger.io/v2",
+  "operation": "UPDATE",
+  "updateInfo": [
+    {
+      "tags": [
+        "pets"
+      ],
+      "methods": [
+        "put"
+      ],
+      "apiEndPoint": "/pet/{petId}/uploadImage",
+      "operation": "UPDATE"
+    },
+    {
+      "tags": [
+        "pets"
+      ],
+      "methods": [
+        "put"
+      ],
+      "apiEndPoint": "/pet/{petId}",
+      "operationId": "getPetById",
+      "operation": "UPDATE"
+    },
+    {
+      "tags": [
+        "store"
+      ],
+      "methods": [
+        "delete"
+      ],
+      "apiEndPoint": "/store/order/{orderId}",
+      "operationId": "deleteOrder",
+      "operation": "DELETE"
+    },
+    {
+      "tags": [
+        "store"
+      ],
+      "methods": [
+        "get"
+      ],
+      "apiEndPoint": "/store/inventory",
+      "operationId": "getInventory",
+      "operation": "DEPRECATED"
+    },
+    {
+      "tags": [
+        "employee"
+      ],
+      "methods": [
+        "post"
+      ],
+      "apiEndPoint": "/employee",
+      "operationId": "createEmployee",
+      "operation": "CREATE"
+    }
+  ]
+}

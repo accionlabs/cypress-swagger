@@ -13,9 +13,12 @@
 	"dependencies": {
 		"@apidevtools/swagger-parser": "^10.1.0",
 		"flatted": "^3.2.9",
+		"js-yaml": "^4.1.0",
 		"json-schema-faker": "^0.5.3",
 		"json-stringify-pretty-compact": "^4.0.0",
+		"jsonfile": "^6.1.0",
 		"lodash": "^4.17.21",
+		"prettier": "^3.1.0",
 		"xml2js": "^0.6.2"
 	},
 	"devDependencies": {

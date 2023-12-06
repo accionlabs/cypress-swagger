@@ -1,56 +1,70 @@
 import { constants } from '../constants.js';
 import {
-  createExampleUsingSchema,
-  getAllCombinationsForRequestbodyAndResponse,
-  getOnlyResponseCombinations,
-  getParamTypeFromPathObject,
-  getSecurityAtPathLevelOrGlobalLevel,
-  getSecurityHeaderWithSchma,
-  mergeArrayOfObjects,
-  mergeParamAndResponseCombinations,
-  setPathParamAndRequestAndResponseMergedObjects,
+	createExampleUsingSchema,
+	getAllCombinationsForRequestbodyAndResponse,
+	getOnlyResponseCombinations,
+	getParamTypeFromPathObject,
+	getSecurityAtPathLevelOrGlobalLevel,
+	getSecurityHeaderWithSchma,
+	mergeArrayOfObjects,
+	mergeParamAndResponseCombinations,
+	setPathParamAndRequestAndResponseMergedObjects,
 } from '../openAPIhelperMethods.js';
 import { openAPISpec } from '../openAPISpec.js';
 import {
-  changeDirectory,
-  concatFileName,
-  writeFile,
+	changeDirectory,
+	concatFileName,
+	writeFile,
+	readFileAsync,
+	writeFileAsync,
+	deleteFile
 } from '../util.js';
 
-export function createDataToSetInFixtureFile() {
+
+export async function createDataToSetInFixtureFile() {
 	let pathObject = openAPISpec.SwaggerPathArrObject;
 	let paramTypesArrObjects = [];
 	let allRequestAndResponseCombinationsArrObjects = [];
-	pathObject.forEach((path) => {
-		let paramTypeObject = getParamTypeFromPathObject(path.parameters);
+	pathObject.forEach(async (path) => {
+		let paramTypeObject = await getParamTypeFromPathObject(path.parameters);
 		let combinations = [];
 		if (Object.keys(paramTypeObject).length !== 0) {
 			paramTypeObject.operationId = path.operationId;
 			paramTypeObject.apiEndpoint = path.apiEndpoint;
+			paramTypeObject.operation = path.operation ? path.operation : "CREATE";
 			paramTypesArrObjects.push(paramTypeObject);
+
 		}
-		combinations = getAllCombinationsForRequestbodyAndResponse(path);
-		allRequestAndResponseCombinationsArrObjects = mergeArrayOfObjects(
+		combinations = await getAllCombinationsForRequestbodyAndResponse(path);
+		allRequestAndResponseCombinationsArrObjects = await mergeArrayOfObjects(
 			allRequestAndResponseCombinationsArrObjects,
 			combinations
 		);
+
+		allRequestAndResponseCombinationsArrObjects = allRequestAndResponseCombinationsArrObjects.map(obj => ({ ...obj, ["operation"]: path.operation ? path.operation : "CREATE" }));
+
+
 	});
 	openAPISpec.paramTypesArrObjects = paramTypesArrObjects;
-	openAPISpec.allRequestAndResponseCombinationsArrObjects =
+	openAPISpec.allRequestAndResponseCombinationsArrObjects = await
 		allRequestAndResponseCombinationsArrObjects;
-	setPathParamAndRequestAndResponseMergedObjects();
-	openAPISpec.paramAndResponseTypedArray = mergeParamAndResponseCombinations();
-	getOnlyResponseCombinations();
-	changeDirectory(constants.fixtureDirPath);
-	createFixtureFiles();
+	await setPathParamAndRequestAndResponseMergedObjects();
+	openAPISpec.paramAndResponseTypedArray = await mergeParamAndResponseCombinations();
+	await getOnlyResponseCombinations();
+	if (constants.cmdArgs.operation == "CREATE") {
+		await changeDirectory(constants.fixtureDirPath);
+	}
+	await createFixtureFiles();
 }
 
-export function createFixtureFiles() {
+export async function createFixtureFiles() {
 	let fileName;
 	let requestBodyFileNames = [],
 		paramRequestAndResponseFileNames = [],
 		onlyResponseCombinationsFileNames = [],
 		paramAndResponseFileNames = [];
+
+
 	openAPISpec.paramTypesArrObjects.forEach(async (param, index) => {
 		fileName =
 			param.operationId != undefined
@@ -68,7 +82,9 @@ export function createFixtureFiles() {
 				paramTypes.push(keys);
 			}
 		});
+
 		await writeFixtureParam(param, fileName, index, paramTypes);
+
 	});
 
 	openAPISpec.allRequestAndResponseCombinationsArrObjects.forEach(
@@ -78,18 +94,16 @@ export function createFixtureFiles() {
 				: "";
 			let responseContentType = requestAndResponse.responseContentType
 				? requestAndResponse.responseContentType
-						.replace("/", "_")
-						.replaceAll("*", "")
+					.replace("/", "_")
+					.replaceAll("*", "")
 				: "";
-			let fileName = `${
-				requestAndResponse.responseStatusCode
-					? requestAndResponse.responseStatusCode
-					: "default"
-			}_${responseContentType}_${requestContentType}_${
-				requestAndResponse.operationId
+			let fileName = `${requestAndResponse.responseStatusCode
+				? requestAndResponse.responseStatusCode
+				: "default"
+				}_${responseContentType}_${requestContentType}_${requestAndResponse.operationId
 					? requestAndResponse.operationId
 					: concatFileName(requestAndResponse.apiEndpoint)
-			}`;
+				}`;
 
 			let statusCodeWiseValue =
 				requestAndResponse.statusCodes.indexOf(
@@ -97,8 +111,8 @@ export function createFixtureFiles() {
 				) > -1
 					? requestAndResponse[requestAndResponse.responseStatusCode]
 					: requestAndResponse.customCreatedExample
-					? requestAndResponse.customCreatedExample
-					: "";
+						? requestAndResponse.customCreatedExample
+						: "";
 
 			let data = {
 				headers: {
@@ -108,14 +122,25 @@ export function createFixtureFiles() {
 				payload: statusCodeWiseValue,
 				responseStatusCode: requestAndResponse.responseStatusCode,
 				responseValue: requestAndResponse.responseValue,
-				responseSchema : requestAndResponse.responseSchema ? requestAndResponse.responseSchema : ""
+				responseSchema: requestAndResponse.responseSchema ? requestAndResponse.responseSchema : ""
 			};
 
 			openAPISpec.allRequestAndResponseCombinationsArrObjects[
 				index
 			].fixtureFileName = fileName;
 			requestBodyFileNames.push(fileName);
-			await writeFile(`${fileName}.json`, customStringify(data));
+
+			if (constants.cmdArgs.operation == "UPDATE") {
+				// await createBackupForFixtures(fileName);
+				// changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+				// await writeFile(`${fileName}.json`, customStringify(data));
+
+				await doUpdateAsPerOperation(requestAndResponse.operation, fileName, customStringify(data));
+			}
+			else {
+
+				await writeFile(`${fileName}.json`, customStringify(data));
+			}
 		}
 	);
 	openAPISpec.requestFixtureBodyFileNames = requestBodyFileNames;
@@ -132,7 +157,7 @@ export function createFixtureFiles() {
 				securitySchema != "" && Object.keys(securitySchema).length > 0
 					? getSecurityHeaderWithSchma(securitySchema)
 					: "";
-			
+
 			paramKeys.forEach((keys) => {
 				if (
 					keys == "pathParam" ||
@@ -146,23 +171,21 @@ export function createFixtureFiles() {
 
 			let requestContentType = paramRequestAndResponse.contentType
 				? paramRequestAndResponse.contentType
-						.replace("/", "_")
-						.replaceAll("*", "")
+					.replace("/", "_")
+					.replaceAll("*", "")
 				: "";
 			let responseContentType = paramRequestAndResponse.responseContentType
 				? paramRequestAndResponse.responseContentType
-						.replace("/", "_")
-						.replaceAll("*", "")
+					.replace("/", "_")
+					.replaceAll("*", "")
 				: "";
-			let fileName = `${
-				paramRequestAndResponse.responseStatusCode
-					? paramRequestAndResponse.responseStatusCode
-					: "default"
-			}_${responseContentType}_${requestContentType}_${
-				paramRequestAndResponse.operationId
+			let fileName = `${paramRequestAndResponse.responseStatusCode
+				? paramRequestAndResponse.responseStatusCode
+				: "default"
+				}_${responseContentType}_${requestContentType}_${paramRequestAndResponse.operationId
 					? paramRequestAndResponse.operationId
 					: concatFileName(paramRequestAndResponse.apiEndpoint)
-			}`;
+				}`;
 
 			openAPISpec.paramAndRequestAndResponse[index].fixtureFileName = fileName;
 			let fixtureObject = {
@@ -176,7 +199,7 @@ export function createFixtureFiles() {
 					: "",
 				responseStatusCode: paramRequestAndResponse.responseStatusCode,
 				responseValue: paramRequestAndResponse.responseValue,
-				responseSchema : paramRequestAndResponse.responseSchema ? paramRequestAndResponse.responseSchema : ""
+				responseSchema: paramRequestAndResponse.responseSchema ? paramRequestAndResponse.responseSchema : ""
 			};
 			paramTypes.forEach((type) => {
 				fixtureObject[type] = {};
@@ -195,7 +218,24 @@ export function createFixtureFiles() {
 			});
 			fixtureObject = addSecurityHeaders(securityHeaders, fixtureObject);
 			data = customStringify(fixtureObject);
-			await writeFile(`${fileName}.json`, data);
+
+
+			if (constants.cmdArgs.operation == "UPDATE") {
+				// if(paramRequestAndResponse.operation == "UPDATE" || paramRequestAndResponse.operation =="DELETE")
+				// {
+
+
+				// }	
+				// await createBackupForFixtures(fileName);
+				// changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+
+				// await writeFile(`${fileName}.json`, data);
+
+				await doUpdateAsPerOperation(paramRequestAndResponse.operation, fileName, data);
+			}
+			else {
+				await writeFile(`${fileName}.json`, data);
+			}
 		}
 	);
 	openAPISpec.paramRequestAndResponseFileNames =
@@ -206,15 +246,13 @@ export function createFixtureFiles() {
 			let responseContentType = responseCombinationOnly.contentType
 				? responseCombinationOnly.contentType.replace("/", "_")
 				: "";
-			let fileName = `${
-				responseCombinationOnly.responseStatusCode
-					? responseCombinationOnly.responseStatusCode
-					: "default"
-			}_${responseContentType}_${
-				responseCombinationOnly.operationId
+			let fileName = `${responseCombinationOnly.responseStatusCode
+				? responseCombinationOnly.responseStatusCode
+				: "default"
+				}_${responseContentType}_${responseCombinationOnly.operationId
 					? responseCombinationOnly.operationId
 					: concatFileName(responseCombinationOnly.apiEndpoint)
-			}`;
+				}`;
 
 			let securitySchema = getSecurityAtPathLevelOrGlobalLevel(responseCombinationOnly);
 			let securityHeaders =
@@ -229,14 +267,24 @@ export function createFixtureFiles() {
 				},
 				responseStatusCode: responseCombinationOnly.responseStatusCode,
 				responseValue: responseCombinationOnly.responseValue,
-				responseSchema : responseCombinationOnly.responseSchema ? responseCombinationOnly.responseSchema : ""
+				responseSchema: responseCombinationOnly.responseSchema ? responseCombinationOnly.responseSchema : ""
 			};
 
 			data = addSecurityHeaders(securityHeaders, data);
-			 
+
 			openAPISpec.onlyResponseCombinations[index].fixtureFileName = fileName;
 			onlyResponseCombinationsFileNames.push(fileName);
-			await writeFile(`${fileName}.json`, customStringify(data));
+			if (constants.cmdArgs.operation == "UPDATE") {
+
+				// await createBackupForFixtures(fileName);
+				// changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+				// await writeFile(`${fileName}.json`, customStringify(data));
+
+				await doUpdateAsPerOperation(responseCombinationOnly.operation, fileName, customStringify(data));
+			}
+			else {
+				await writeFile(`${fileName}.json`, customStringify(data));
+			}
 		}
 	);
 
@@ -255,7 +303,7 @@ export function createFixtureFiles() {
 				securitySchema != "" && Object.keys(securitySchema).length > 0
 					? getSecurityHeaderWithSchma(securitySchema)
 					: "";
-			
+
 			paramKeys.forEach((keys) => {
 				if (
 					keys == "pathParam" ||
@@ -266,27 +314,25 @@ export function createFixtureFiles() {
 					paramTypes.push(keys);
 				}
 			});
-		
+
 			let requestContentType = paramAndResponse.contentType
 				? paramAndResponse.contentType
-						.replace("/", "_")
-						.replaceAll("*", "")
+					.replace("/", "_")
+					.replaceAll("*", "")
 				: "";
 			let responseContentType = paramAndResponse.responseContentType
 				? paramAndResponse.responseContentType
-						.replace("/", "_")
-						.replaceAll("*", "")
+					.replace("/", "_")
+					.replaceAll("*", "")
 				: "";
-			let fileName = `${
-				paramAndResponse.responseStatusCode
-					? paramAndResponse.responseStatusCode
-					: "default"
-			}_${responseContentType}_${requestContentType}_${
-				paramAndResponse.operationId
+			let fileName = `${paramAndResponse.responseStatusCode
+				? paramAndResponse.responseStatusCode
+				: "default"
+				}_${responseContentType}_${requestContentType}_${paramAndResponse.operationId
 					? paramAndResponse.operationId
 					: concatFileName(paramAndResponse.apiEndpoint)
-			}`;
-		
+				}`;
+
 			openAPISpec.paramAndResponseTypedArray[index].fixtureFileName = fileName;
 			let fixtureObject = {
 				headers: {
@@ -296,7 +342,7 @@ export function createFixtureFiles() {
 				},
 				responseStatusCode: paramAndResponse.responseStatusCode,
 				responseValue: paramAndResponse.responseValue,
-				responseSchema : paramAndResponse.responseSchema ? paramAndResponse.responseSchema : ""
+				responseSchema: paramAndResponse.responseSchema ? paramAndResponse.responseSchema : ""
 			};
 			paramTypes.forEach((type) => {
 				fixtureObject[type] = {};
@@ -315,7 +361,16 @@ export function createFixtureFiles() {
 			});
 			fixtureObject = addSecurityHeaders(securityHeaders, fixtureObject);
 			data = customStringify(fixtureObject);
-			await writeFile(`${fileName}.json`, data);
+			if (constants.cmdArgs.operation == "UPDATE") {
+
+				// await createBackupForFixtures(fileName);
+				// changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+				// await writeFile(`${fileName}.json`, data);
+				await doUpdateAsPerOperation(paramAndResponse.operation, fileName, data);
+			}
+			else {
+				await writeFile(`${fileName}.json`, data);
+			}
 		}
 	);
 	openAPISpec.paramAndResponseFileNames =
@@ -324,7 +379,7 @@ export function createFixtureFiles() {
 
 }
 
-export function writeFixtureParam(param, fileName, parentIndex, paramTypes) {
+export async function writeFixtureParam(param, fileName, parentIndex, paramTypes) {
 	let paramFileNames = [];
 	let securitySchema = getSecurityAtPathLevelOrGlobalLevel(param);
 	let securityHeaders =
@@ -332,7 +387,7 @@ export function writeFixtureParam(param, fileName, parentIndex, paramTypes) {
 			? getSecurityHeaderWithSchma(securitySchema)
 			: "";
 
-			
+
 
 	let fixtureFileData = {
 		headers: {},
@@ -364,14 +419,21 @@ export function writeFixtureParam(param, fileName, parentIndex, paramTypes) {
 	});
 
 
-	
-
 	fixtureFileData = addSecurityHeaders(securityHeaders, fixtureFileData);
-	
+
 	paramFileNames.push(fileName);
 	openAPISpec.paramTypesArrObjects[parentIndex].fixtureFileName = fileName;
+	if (constants.cmdArgs.operation == "UPDATE") {
+		// await createBackupForFixtures(fileName);
+		// changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+		// await writeFile(`${fileName}.json`, customStringify(fixtureFileData));
 
-	writeFile(`${fileName}.json`, customStringify(fixtureFileData));
+		await doUpdateAsPerOperation(param.operation, fileName, data);
+	}
+	else {
+		await writeFile(`${fileName}.json`, customStringify(fixtureFileData));
+	}
+
 	openAPISpec.paramFixtureFileNames = paramFileNames;
 }
 
@@ -397,7 +459,7 @@ function addSecurityHeaders(securityHeaders, fixtureFileData) {
 	if (securityHeaders != "") {
 		switch (securityHeaders.in) {
 			case "header":
-				fixtureFileData.headers = {...fixtureFileData.headers,...securityHeaders.security} ;
+				fixtureFileData.headers = { ...fixtureFileData.headers, ...securityHeaders.security };
 				// fixtureFileData.headers["header"] = "";
 				break;
 
@@ -423,4 +485,70 @@ function addSecurityHeaders(securityHeaders, fixtureFileData) {
 		}
 	}
 	return fixtureFileData;
+}
+
+export async function createBackupForFixtures(filePath) {
+	// Read the contents of the existing file
+	await changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+	try {
+
+		const fileData = await readFileAsync(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\${filePath}.json`);
+
+		const backupFilePath = `${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\${filePath}_backup.json`;
+
+		await writeFileAsync(backupFilePath, fileData);
+		// readFileAsync(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\${filePath}.json`, 'utf8', async (err, data) => {
+		// 	if (err) {
+		// 		console.error(`Error reading file: ${err.message}`);
+		// 		return;
+		// 	}
+		// 	console.log("In backup..."+process.cwd());
+		// 	//await changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+		// 	// Create a backup file by appending a timestamp to the original file name
+		// 	const backupFilePath = `${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\${filePath}_backup.json`;
+
+		// 	// Write the contents to the backup file
+		// 	fs.writeFileSync(backupFilePath, data, 'utf8',async (err) => {
+		// 		if (err) {
+		// 		console.error(`Error creating backup: ${err.message}`);
+		// 		return;
+		// 		}
+		// 		console.log(`Backup created successfully at: ${backupFilePath}`);
+		// 	});
+		// });
+	}
+	catch (err) {
+		console.log("inside fixture " + err);
+	}
+}
+
+
+async function doUpdateAsPerOperation(type, fileName, data) {
+	switch (type) {
+		case "UPDATE":
+			await createBackupForFixtures(fileName);
+			changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+			await writeFile(`${fileName}.json`, data);
+			break;
+		case "DEPRECATED":
+			// code to be executed if expression matches DEPRECATED
+			changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+			await writeFile(`${fileName}.json`, data);
+			break;
+		case "DELETE":
+			// code to be executed if expression matches DELETE
+			await createBackupForFixtures(fileName);
+			changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+			await deleteFile(`${fileName}.json`);
+			break;
+		case "CREATE":
+			// code to be executed if expression matches CREATE
+			changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+			await writeFile(`${fileName}.json`, data);
+			break;
+		// more cases as needed
+		default:
+		// code to be executed if expression doesn't match any case
+	}
+
 }

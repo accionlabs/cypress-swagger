@@ -1,15 +1,18 @@
 import SwaggerParser from "@apidevtools/swagger-parser";
-
+import fs from "fs";
 import { constants } from "../constants.js";
 import { createCypressFolderStructure } from "../cypress-folder-structure/cypress-folders.js";
 import {
 	convertPathIntoArrayOfObjects,
 	flattenPathObject,
+	filterOutJSONBasedOnUpdateOptions
 } from "../openAPIhelperMethods.js";
 import { openAPISpec } from "../openAPISpec.js";
 import { checkAndSetServerURLData, validateServerURL } from "./serverCheck.js";
+import { changeDirectory, executeCommandInCli } from "../util.js";
+let config = {};
 
-function validateServers() {
+async function validateServers() {
 	if (
 		openAPISpec.swaggerParsedObject.servers == undefined ||
 		openAPISpec.swaggerParsedObject.servers.length == 0
@@ -21,25 +24,25 @@ function validateServers() {
 	}
 }
 
-function checkIfCommandLineArgs(args) {
-	if (args[0] == undefined || args[0] == undefined) {
+async function checkIfCommandLineArgs(config) {
+	if (config.swaggerPathFile == undefined || config.swaggerPathFile == "") {
 		console.log("Swagger file is not passed in command line arguments.");
 		process.exit(0);
 	}
 
-	if (args[1] == undefined || args[1] == undefined) {
+	if (config.swaggerOutputFilePath == undefined || config.swaggerOutputFilePath == "") {
 		console.log("File path to save cypress project is not provided.");
 		process.exit(0);
 	}
 
-	if (args[2] == undefined || args[2] == undefined) {
+	if (config.serverUrl == undefined || config.serverUrl == "") {
 		console.error("Please provide a server URL as a command line argument.");
 		process.exit(0);
 	}
 }
 
 // Helper function to generate URL combinations for a server object
-function generateURLCombinations(server) {
+async function generateURLCombinations(server) {
 	if (!server.variables) {
 		return [server.url];
 	}
@@ -62,19 +65,19 @@ function generateURLCombinations(server) {
 	return urlCombinations;
 }
 
-function getSecuritySchema() {
+async function getSecuritySchema() {
 	let securitySchema =
 		openAPISpec.swaggerParsedObject?.components &&
-		openAPISpec.swaggerParsedObject?.components?.securitySchemes
+			openAPISpec.swaggerParsedObject?.components?.securitySchemes
 			? openAPISpec.swaggerParsedObject?.components?.securitySchemes
 			: undefined;
 
 	openAPISpec.securitySchemes = securitySchema ? securitySchema : [];
 }
 
-function getSecurityFromPathLevelObject() {
+async function getSecurityFromPathLevelObject() {
 	let securityLevelPathArrObject = [];
-	openAPISpec.SwaggerPathArrObject.forEach((path) => {
+	openAPISpec.SwaggerPathArrObject?.forEach((path) => {
 		let security = path?.security ? path?.security : undefined;
 		let obj = {
 			operationId: path.operationId,
@@ -86,54 +89,107 @@ function getSecurityFromPathLevelObject() {
 	openAPISpec.securityAtPathLevelObject = securityLevelPathArrObject;
 }
 
+async function readJsonFile(filePath) {
+	try {
+		// Read the contents of the file
+		const data = await fs.readFileSync(filePath, 'utf8');
+
+		// Parse the JSON data
+		const jsonData = JSON.parse(data);
+
+		// Now you can work with the parsed data
+
+		// Return the parsed data if needed
+		return jsonData;
+	} catch (error) {
+		console.error('Error reading or parsing JSON file:', error);
+
+		// You might want to throw the error or handle it appropriately
+		throw error;
+	}
+}
+
 export async function initiateSwaggerToCypress(args) {
 	// check command line arguments are passed or not
-	checkIfCommandLineArgs(args);
+	readJsonFile(args[0])
+		.then(async (data) => {
+			config = data;
+			constants.cmdArgs = config;
+			await checkIfCommandLineArgs(config);
+			constants.swaggerFilePath = await config.swaggerPathFile;
+			openAPISpec.swaggerParsedObject = await SwaggerParser.parse(config.swaggerPathFile);
+			openAPISpec.swaggerParsedObject = await SwaggerParser.dereference(
+				openAPISpec.swaggerParsedObject
+			);
+			openAPISpec.SwaggerPathArrObject = await convertPathIntoArrayOfObjects(
+				openAPISpec.swaggerParsedObject.paths,
+				"apiEndpoint"
+			);
 
-	openAPISpec.swaggerParsedObject = await SwaggerParser.parse(args[0]);
-	openAPISpec.swaggerParsedObject = await SwaggerParser.dereference(
-		openAPISpec.swaggerParsedObject
-	);
-	openAPISpec.SwaggerPathArrObject = await convertPathIntoArrayOfObjects(
-		openAPISpec.swaggerParsedObject.paths,
-		"apiEndpoint"
-	);
 
-	getSecuritySchema();
+			await getSecuritySchema();
 
-	openAPISpec.security = openAPISpec.swaggerParsedObject?.security
-		? openAPISpec.swaggerParsedObject?.security
-		: undefined;
+			openAPISpec.security = await openAPISpec.swaggerParsedObject?.security
+				? openAPISpec.swaggerParsedObject?.security
+				: undefined;
 
-	openAPISpec.SwaggerPathArrObject = flattenPathObject(
-		openAPISpec.SwaggerPathArrObject
-	);
+			openAPISpec.SwaggerPathArrObject = await flattenPathObject(
+				openAPISpec.SwaggerPathArrObject
+			);
 
-	// set security schema as per operation id
-	getSecurityFromPathLevelObject();
+			// console.log(openAPISpec.SwaggerPathArrObject);	
 
-	// check if parsed swagger object consist of server or not.
-	validateServers();
+			await filterDataBasedOnOperation(config.operation);
+			// set security schema as per operation id
+			await getSecurityFromPathLevelObject();
 
-	// Generate URL combinations for each server
-	openAPISpec.allURLCombinations = openAPISpec.swaggerParsedObject.servers.map(
-		generateURLCombinations
-	);
-	openAPISpec.allURLCombinations = openAPISpec.allURLCombinations.flat();
+			// check if parsed swagger object consist of server or not.
+			await validateServers();
 
-	//validate if base url received or not
-	validateServerURL(args[2]);
-	// set Base URL
-	checkAndSetServerURLData(args[2]);
-	// set cypress project path
-	constants.projectPath = args[1];
+			// Generate URL combinations for each server
+			openAPISpec.allURLCombinations = await openAPISpec.swaggerParsedObject.servers.map(
+				generateURLCombinations
+			);
 
-	// create cypress folder structure
-	createCypressFolderStructure()
-		.then(() => {
-			console.log("Cypress project got created..");
+			openAPISpec.allURLCombinations = await openAPISpec.allURLCombinations.flat();
+
+			//validate if base url received or not
+			await validateServerURL(config.serverUrl);
+			// set Base URL
+			await checkAndSetServerURLData(config.serverUrl);
+			// set cypress project path
+			constants.projectPath = await config.swaggerOutputFilePath;
+
+			// create cypress folder structure
+			await createCypressFolderStructure()
+				.then(async () => {
+					await formatAllFilesInProject();
+					console.log("Cypress project got created..");
+				})
+				.catch((err) => {
+					console.error("Error:", err);
+				});
 		})
-		.catch((err) => {
-			console.error("Error:", err);
+		.catch((error) => {
+			console.log("can't JSON config file", error);
 		});
+}
+
+
+export async function filterDataBasedOnOperation(type) {
+	if (type == "UPDATE")
+		openAPISpec.SwaggerPathArrObject = await filterOutJSONBasedOnUpdateOptions(openAPISpec.SwaggerPathArrObject, config.updateInfo);
+
+}
+
+export async function formatAllFilesInProject() {
+	await changeDirectory("../../");
+	try {
+		console.log('inside format...');
+		await executeCommandInCli(constants.pretterierFormatAllFiles, {
+			stdio: "inherit",
+		});
+	} catch {
+		console.log("files formatted");
+	}
 }

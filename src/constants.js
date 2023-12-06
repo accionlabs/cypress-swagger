@@ -1,39 +1,42 @@
 export const constants = {
-	projectPath: "",
-	npmPackage: `npm init -y`,
-	cypressPackage: `npm install --save cypress config`,
-	ajyPackage: `npm install ajv --save`,
-	cypressFoldersName: ["downloads", "e2e", "fixtures", "support"],
-	cypressParentDirectory: ".",
-	fixtureDirPath: "../../fixtures",
-    cypressRunAndGenerateReportCommand : { "generate-merge-report" : "npx cypress run --reporter mochawesome \
+    projectPath: "",
+    swaggerFilePath: "",
+    npmPackage: `npm init -y`,
+    cmdArgs: {},
+    cypressPackage: `npm install --save cypress config`,
+    ajyPackage: `npm install ajv --save`,
+    cypressFoldersName: ["downloads", "e2e", "fixtures", "support"],
+    cypressParentDirectory: ".",
+    fixtureDirPath: "../../fixtures",
+    cypressRunAndGenerateReportCommand: {
+        "generate-merge-report": "npx cypress run --reporter mochawesome \
     --reporter-options reportDir='cypress/results',overwrite=false,html=false,json=true && npx mochawesome-merge 'cypress/results/*.json' > mochawesome.json"},
-    cypressRunCommand : "npx cypress run",
-    contentTypesSupportsFileUploadAndDownload : [
-                                                    "application/octet-stream",
-                                                    "application/pdf",
-                                                    "application/zip",
-                                                    "application/gzip",
-                                                    "application/vnd.mycompany.myapp.v2+json",
-                                                    "application/vnd.ms-excel",
-                                                    "application/vnd.openstreetmap.data+xml",
-                                                    "Application/msword",
-                                                    "image/png",
-                                                    "image/jpeg",
-                                                    "image/gif",
-                                                    "image/bmp"
-                                                ],
-	pretteierPackage: "npm install --save-dev --save-exact prettier",
-    reportingPackages : "npm install --save-dev mochawesome mochawesome-merge mochawesome-report-generator",
-	pretterierFormatAllFiles: "npx prettier . --write",
-	pretteierConfig: `  { "trailingComma": "es5", 
+    cypressRunCommand: "npx cypress run",
+    contentTypesSupportsFileUploadAndDownload: [
+        "application/octet-stream",
+        "application/pdf",
+        "application/zip",
+        "application/gzip",
+        "application/vnd.mycompany.myapp.v2+json",
+        "application/vnd.ms-excel",
+        "application/vnd.openstreetmap.data+xml",
+        "Application/msword",
+        "image/png",
+        "image/jpeg",
+        "image/gif",
+        "image/bmp"
+    ],
+    pretteierPackage: "npm install --save-dev --save-exact prettier",
+    reportingPackages: "npm install --save-dev mochawesome mochawesome-merge mochawesome-report-generator",
+    pretterierFormatAllFiles: "npx prettier . --write",
+    pretteierConfig: `  { "trailingComma": "es5", 
                             "tabWidth": 4, 
                             "semi": true, 
                             "singleQuote": true 
                         }`,
-	cypressFileExtension: ".cy.js",
-	cypressEnvSyntaxIncode: `Cypress.env("CYPRESS_BASE_URL")`,
-	cypressConfig: ` const { defineConfig } = require("cypress");
+    cypressFileExtension: ".cy.js",
+    cypressEnvSyntaxIncode: `Cypress.env("CYPRESS_BASE_URL")`,
+    cypressConfig: ` const { defineConfig } = require("cypress");
                         module.exports = defineConfig({
                         e2e: {
                             setupNodeEvents(on, config) {
@@ -53,7 +56,7 @@ export const constants = {
                             }
                         },
                     }) `,
-	reportConfig: `{
+    reportConfig: `{
                         "reporterEnabled": "mochawesome",
                         "mochawesomeReporterOptions": {
                             "reportDir": "cypress/reports",
@@ -65,7 +68,7 @@ export const constants = {
                             "video": false 
                         }
                     }`,
-	customCommands: `// ***********************************************
+    customCommands: `// ***********************************************
                         // This example commands.js shows you how to
                         // create various custom commands and overwrite
                         // existing commands.
@@ -91,7 +94,7 @@ export const constants = {
                         // -- This will overwrite an existing command --
                         // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
                         `,
-	globalConfig: `// ***********************************************************
+    globalConfig: `// ***********************************************************
                     // This example support/e2e.js is processed and
                     // loaded automatically before your test files.
                     //
