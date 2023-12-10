@@ -14,7 +14,7 @@ import {
 
 
 export async function writeDynamicTestCases() {
-	if (constants.cmdArgs.operation == "CREATE") {
+	if (constants.operation == "CREATE") {
 		await changeDirectory("../e2e/API_TESTING");
 	}
 
@@ -23,7 +23,7 @@ export async function writeDynamicTestCases() {
 		for (const tag of tagFolders) {
 			let operations = await getOperationsForTag(tag);
 
-			if (constants.cmdArgs.operation == "CREATE") {
+			if (constants.operation == "CREATE") {
 				await changeDirectory(`${tag}`);
 			}
 
@@ -50,8 +50,8 @@ export async function writeDynamicTestCases() {
 					);
 				}
 
-				describeBlock = ` const Ajv = require("ajv");
-							const ajv = new Ajv();
+				describeBlock = ` import Ajv from "ajv";
+							 const ajv = new Ajv();
 							const apiBaseURL = Cypress.env("CYPRESS_BASE_URL");
 							let requestInfo = JSON.parse(JSON.stringify(${requestInfo}));
 							requestInfo.url = apiBaseURL + requestInfo.url;
@@ -62,10 +62,10 @@ export async function writeDynamicTestCases() {
 							  ${itTestBlock}
 							});`;
 
-				if (constants.cmdArgs.operation == "UPDATE") {
+				if (constants.operation == "UPDATE") {
 					try {
-						let filePath = constants.cmdArgs.swaggerOutputFilePath + "\\cypress\\e2e\\API_TESTING\\" + tag + "\\" + cypressFileName;
-						await doUpdateTestCasesAsPerOperation(path.operation, filePath, constants.cmdArgs.swaggerOutputFilePath + "\\cypress\\e2e\\API_TESTING\\" + tag, describeBlock, cypressFileName);
+						let filePath = constants.fullPathOfSwaggerGitProject + "\\cypress\\e2e\\API_TESTING\\" + tag + "\\" + cypressFileName;
+						await doUpdateTestCasesAsPerOperation(path.operation, filePath, constants.fullPathOfSwaggerGitProject + "\\cypress\\e2e\\API_TESTING\\" + tag, describeBlock, cypressFileName);
 					} catch (err) {
 						console.error(`Error processing file ${cypressFileName}: ${err}`);
 					}
@@ -74,7 +74,7 @@ export async function writeDynamicTestCases() {
 				}
 			}
 
-			if (constants.cmdArgs.operation == "CREATE") {
+			if (constants.operation == "CREATE") {
 				await changeDirectory("..");
 			}
 		}
@@ -82,13 +82,13 @@ export async function writeDynamicTestCases() {
 		console.error(`Error in processTagFolders: ${error}`);
 	}
 
-	// if (constants.cmdArgs.operation == "CREATE") {
+	// if (constants.operation == "CREATE") {
 	// 	changeDirectory("../../fixtures");
 	// }
 
-	// if(constants.cmdArgs.operation == "UPDATE")
+	// if(constants.operation == "UPDATE")
 	// {
-	// 	changeDirectory(constants.cmdArgs.swaggerOutputFilePath+"\\cypress\\fixtures");
+	// 	changeDirectory(constants.fullPathOfSwaggerGitProject+"\\cypress\\fixtures");
 	// }
 
 

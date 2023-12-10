@@ -1,8 +1,24 @@
+import dotenv from 'dotenv';
+// Load environment variables from .env file
+dotenv.config({
+    path: "./.env"
+});
+
 export const constants = {
-    projectPath: "",
-    swaggerFilePath: "",
+    projectPath: process.env.SWAGGER_OUTPUT_FILE_PATH,
+    repoNameForOutputGeneration: "",
+    fullPathOfSwaggerGitProject: `${process.env.SWAGGER_OUTPUT_FILE_PATH}//${process.env.REPO_NAME}`,
+    commitMessageToPushInRepo: process.env.COMMIT_MESSAGE_TO_PUSHINREPO,
+    repoOwner: process.env.REPO_OWNER,
+    repoName: process.env.REPO_NAME,
+    repoUrlInWhichOutputTobePushed: process.env.REPO_URL_IN_WHICH_OUTPUT_TO_BE_PUSHED,
+    branchName: process.env.BRANCH_NAME,
+    masterBranchName: process.env.MASTER_BRANCH_NAME,
+    swaggerPathFile: process.env.SWAGGERFILE_PATH,
+    operation: process.env.OPERATION,
+    serverUrl: process.env.SERVER_URL,
     npmPackage: `npm init -y`,
-    cmdArgs: {},
+    updateInfo: [],
     cypressPackage: `npm install --save cypress config`,
     ajyPackage: `npm install ajv --save`,
     cypressFoldersName: ["downloads", "e2e", "fixtures", "support"],

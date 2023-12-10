@@ -51,7 +51,7 @@ export async function createDataToSetInFixtureFile() {
 	await setPathParamAndRequestAndResponseMergedObjects();
 	openAPISpec.paramAndResponseTypedArray = await mergeParamAndResponseCombinations();
 	await getOnlyResponseCombinations();
-	if (constants.cmdArgs.operation == "CREATE") {
+	if (constants.operation == "CREATE") {
 		await changeDirectory(constants.fixtureDirPath);
 	}
 	await createFixtureFiles();
@@ -130,9 +130,9 @@ export async function createFixtureFiles() {
 			].fixtureFileName = fileName;
 			requestBodyFileNames.push(fileName);
 
-			if (constants.cmdArgs.operation == "UPDATE") {
+			if (constants.operation == "UPDATE") {
 				// await createBackupForFixtures(fileName);
-				// changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+				// changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 				// await writeFile(`${fileName}.json`, customStringify(data));
 
 				await doUpdateAsPerOperation(requestAndResponse.operation, fileName, customStringify(data));
@@ -220,14 +220,14 @@ export async function createFixtureFiles() {
 			data = customStringify(fixtureObject);
 
 
-			if (constants.cmdArgs.operation == "UPDATE") {
+			if (constants.operation == "UPDATE") {
 				// if(paramRequestAndResponse.operation == "UPDATE" || paramRequestAndResponse.operation =="DELETE")
 				// {
 
 
 				// }	
 				// await createBackupForFixtures(fileName);
-				// changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+				// changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 
 				// await writeFile(`${fileName}.json`, data);
 
@@ -274,10 +274,10 @@ export async function createFixtureFiles() {
 
 			openAPISpec.onlyResponseCombinations[index].fixtureFileName = fileName;
 			onlyResponseCombinationsFileNames.push(fileName);
-			if (constants.cmdArgs.operation == "UPDATE") {
+			if (constants.operation == "UPDATE") {
 
 				// await createBackupForFixtures(fileName);
-				// changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+				// changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 				// await writeFile(`${fileName}.json`, customStringify(data));
 
 				await doUpdateAsPerOperation(responseCombinationOnly.operation, fileName, customStringify(data));
@@ -361,10 +361,10 @@ export async function createFixtureFiles() {
 			});
 			fixtureObject = addSecurityHeaders(securityHeaders, fixtureObject);
 			data = customStringify(fixtureObject);
-			if (constants.cmdArgs.operation == "UPDATE") {
+			if (constants.operation == "UPDATE") {
 
 				// await createBackupForFixtures(fileName);
-				// changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+				// changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 				// await writeFile(`${fileName}.json`, data);
 				await doUpdateAsPerOperation(paramAndResponse.operation, fileName, data);
 			}
@@ -423,9 +423,9 @@ export async function writeFixtureParam(param, fileName, parentIndex, paramTypes
 
 	paramFileNames.push(fileName);
 	openAPISpec.paramTypesArrObjects[parentIndex].fixtureFileName = fileName;
-	if (constants.cmdArgs.operation == "UPDATE") {
+	if (constants.operation == "UPDATE") {
 		// await createBackupForFixtures(fileName);
-		// changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+		// changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 		// await writeFile(`${fileName}.json`, customStringify(fixtureFileData));
 
 		await doUpdateAsPerOperation(param.operation, fileName, data);
@@ -489,23 +489,23 @@ function addSecurityHeaders(securityHeaders, fixtureFileData) {
 
 export async function createBackupForFixtures(filePath) {
 	// Read the contents of the existing file
-	await changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+	await changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 	try {
 
-		const fileData = await readFileAsync(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\${filePath}.json`);
+		const fileData = await readFileAsync(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}.json`);
 
-		const backupFilePath = `${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\${filePath}_backup.json`;
+		const backupFilePath = `${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}_backup.json`;
 
 		await writeFileAsync(backupFilePath, fileData);
-		// readFileAsync(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\${filePath}.json`, 'utf8', async (err, data) => {
+		// readFileAsync(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}.json`, 'utf8', async (err, data) => {
 		// 	if (err) {
 		// 		console.error(`Error reading file: ${err.message}`);
 		// 		return;
 		// 	}
 		// 	console.log("In backup..."+process.cwd());
-		// 	//await changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+		// 	//await changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 		// 	// Create a backup file by appending a timestamp to the original file name
-		// 	const backupFilePath = `${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\${filePath}_backup.json`;
+		// 	const backupFilePath = `${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}_backup.json`;
 
 		// 	// Write the contents to the backup file
 		// 	fs.writeFileSync(backupFilePath, data, 'utf8',async (err) => {
@@ -527,23 +527,23 @@ async function doUpdateAsPerOperation(type, fileName, data) {
 	switch (type) {
 		case "UPDATE":
 			await createBackupForFixtures(fileName);
-			changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+			changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 			await writeFile(`${fileName}.json`, data);
 			break;
 		case "DEPRECATED":
 			// code to be executed if expression matches DEPRECATED
-			changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+			changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 			await writeFile(`${fileName}.json`, data);
 			break;
 		case "DELETE":
 			// code to be executed if expression matches DELETE
 			await createBackupForFixtures(fileName);
-			changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+			changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 			await deleteFile(`${fileName}.json`);
 			break;
 		case "CREATE":
 			// code to be executed if expression matches CREATE
-			changeDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\fixtures\\`);
+			changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 			await writeFile(`${fileName}.json`, data);
 			break;
 		// more cases as needed

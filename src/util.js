@@ -1,14 +1,16 @@
 import { execSync } from "child_process";
-import fs from "fs";
+import fs from 'fs';
 
 export async function writeFile(fileName, data) {
-	await fs.writeFileSync(fileName, data);
+	if (!await checkIfFolderExists(fileName)) {
+		await fs.writeFileSync(fileName, data);
+	}
 }
 
 export async function createDirectory(folderPath, config) {
-	//if (!await checkIfFolderExists(folderPath)) {
-	await fs.mkdirSync(folderPath, config);
-	//}
+	if (!await checkIfFolderExists(folderPath)) {
+		await fs.mkdirSync(folderPath, config);
+	}
 }
 
 export async function checkIfFolderExists(path) {
@@ -20,6 +22,16 @@ export async function changeDirectory(path) {
 	process.chdir(path);
 	// }
 
+}
+
+export async function createDirIfDoesntExist(path) {
+	if (!await checkIfFolderExists(path)) {
+		await createDirectory(path);
+		await changeDirectory(path);
+	}
+	else {
+		await changeDirectory(path);
+	}
 }
 
 export async function executeCommandInCli(command, config) {
@@ -75,5 +87,31 @@ export async function deleteFile(filePath) {
 		}
 	} catch (err) {
 		console.error('Error deleting file:', err);
+	}
+}
+
+export async function executeGitCommand(command, message) {
+	try {
+		await execSync(command);
+		console.log(message);
+	} catch (error) {
+		console.error(`Error executing "${command}":`, error);
+	}
+}
+
+
+export async function removeFolder(folderPath) {
+	try {
+		// Check if the folder exists
+		console.log(await checkIfFolderExists(folderPath));
+		if (await checkIfFolderExists(folderPath)) {
+			// Remove the folder and its contents
+			await fs.rmdirSync(folderPath, { recursive: true });
+			console.log('Folder and its contents removed successfully.');
+		} else {
+			console.log('Folder does not exist.');
+		}
+	} catch (error) {
+		console.error('Error:', error.message);
 	}
 }

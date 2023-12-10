@@ -21,18 +21,18 @@ import yaml from 'js-yaml';
 export async function createTagFolders(paths) {
 	let tagFolders = await getTagsFolders(paths);
 	openAPISpec.tagFolders = tagFolders;
-	if (constants.cmdArgs.operation == "CREATE") {
+	if (constants.operation == "CREATE") {
 		tagFolders.forEach(async (tag) => {
 			await createDirectory(`${tag}`, { recursive: true });
 		});
 		await createOperationFiles();
 	}
 
-	if (constants.cmdArgs.operation == "UPDATE") {
+	if (constants.operation == "UPDATE") {
 		tagFolders.forEach(async (tag) => {
-			if (!await checkIfFolderExists(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\e2e\\API_TESTING\\${tag}\\`)) {
+			if (!await checkIfFolderExists(`${constants.fullPathOfSwaggerGitProject}\\cypress\\e2e\\API_TESTING\\${tag}\\`)) {
 				console.log("Inside tag UPDATE..");
-				await createDirectory(`${constants.cmdArgs.swaggerOutputFilePath}\\cypress\\e2e\\API_TESTING\\${tag}\\`, { recursive: true });
+				await createDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\e2e\\API_TESTING\\${tag}\\`, { recursive: true });
 			}
 		});
 	}
@@ -66,13 +66,13 @@ export async function createFilesAndFoldersForTagsAndOperations() {
 				.then(async () => {
 					await writeDynamicTestCases()
 						.then(async () => {
-							const originalFilePath = constants.swaggerFilePath;
-							const newFilePath = `${constants.cmdArgs.swaggerOutputFilePath}//cypress//fixtures//swagger.json`;
+							const originalFilePath = constants.swaggerPathFile;
+							const newFilePath = `${constants.fullPathOfSwaggerGitProject}//cypress//fixtures//swagger.json`;
 							await copyFile(originalFilePath, newFilePath);
 						});
 				})
 				.catch((err) => {
-					console.log("Error occured whil setting data in fixture files.", err);
+					console.log("Error occured while setting data in fixture files.", err);
 				})
 		})
 
