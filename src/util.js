@@ -2,9 +2,9 @@ import { execSync } from "child_process";
 import fs from 'fs';
 
 export async function writeFile(fileName, data) {
-	if (!await checkIfFolderExists(fileName)) {
-		await fs.writeFileSync(fileName, data);
-	}
+	//if (!await checkIfFolderExists(fileName)) {
+	await fs.writeFileSync(fileName, data);
+	// }
 }
 
 export async function createDirectory(folderPath, config) {
