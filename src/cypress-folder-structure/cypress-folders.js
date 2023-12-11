@@ -18,7 +18,7 @@ import fs from "fs";
 import { cloneRepository } from "../git-operations/git-flow.js";
 
 export async function createFolders(folders, parentDirectory) {
-	folders.forEach(async (folderName) => {
+	await folders.forEach(async (folderName) => {
 		const folderPath = `${parentDirectory}/${folderName}`;
 		await createDirectory(folderPath, { recursive: true });
 		console.log(`Folder ${folderPath} created successfully.`);
