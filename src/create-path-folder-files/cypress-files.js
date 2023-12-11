@@ -22,14 +22,14 @@ export async function createTagFolders(paths) {
 	let tagFolders = await getTagsFolders(paths);
 	openAPISpec.tagFolders = tagFolders;
 	if (constants.operation == "CREATE") {
-		tagFolders.forEach(async (tag) => {
+		await tagFolders.forEach(async (tag) => {
 			await createDirectory(`${tag}`, { recursive: true });
 		});
 		await createOperationFiles();
 	}
 
 	if (constants.operation == "UPDATE") {
-		tagFolders.forEach(async (tag) => {
+		await tagFolders.forEach(async (tag) => {
 			if (!await checkIfFolderExists(`${constants.fullPathOfSwaggerGitProject}\\cypress\\e2e\\API_TESTING\\${tag}\\`)) {
 				console.log("Inside tag UPDATE..");
 				await createDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\e2e\\API_TESTING\\${tag}\\`, { recursive: true });
