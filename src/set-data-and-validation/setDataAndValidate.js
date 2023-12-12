@@ -140,7 +140,7 @@ export async function initiateSwaggerToCypress() {
 	);
 
 	// console.log(openAPISpec.SwaggerPathArrObject);	
-
+	console.log(constants.operation);
 	await filterDataBasedOnOperation(constants.operation);
 	// set security schema as per operation id
 	await getSecurityFromPathLevelObject();

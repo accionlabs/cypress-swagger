@@ -95,23 +95,21 @@ export async function executeGitCommand(command, message) {
 		await execSync(command);
 		console.log(message);
 	} catch (error) {
-		console.error(`Error executing "${command}":`, error);
+		console.error(`Error while executing "${command}":`, error);
+		process.exit(1);
 	}
 }
 
 
 export async function removeFolder(folderPath) {
 	try {
-		// Check if the folder exists
-		console.log(await checkIfFolderExists(folderPath));
 		if (await checkIfFolderExists(folderPath)) {
-			// Remove the folder and its contents
 			await fs.rmdirSync(folderPath, { recursive: true });
 			console.log('Folder and its contents removed successfully.');
 		} else {
 			console.log('Folder does not exist.');
 		}
 	} catch (error) {
-		console.error('Error:', error.message);
+		console.error('Error while removing folder :', error.message);
 	}
 }

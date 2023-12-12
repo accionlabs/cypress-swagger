@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
-// Load environment variables from .env file
-dotenv.config({
-    path: "./env"
-});
 import { initiateSwaggerToCypress } from "./src/set-data-and-validation/setDataAndValidate.js";
-// let args = process.argv.splice(2);
+const environment = process.env.ENV || "development";
+
+dotenv.config({
+    path: `./env.${environment}`
+});
 
 export async function init() {
     await initiateSwaggerToCypress();

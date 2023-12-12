@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 // Load environment variables from .env file
+const environment = process.env.ENV || "development";
+
 dotenv.config({
-    path: "./.env"
+    path: `./.env.${environment}`
 });
 
 export const constants = {
@@ -25,8 +27,10 @@ export const constants = {
     cypressParentDirectory: ".",
     fixtureDirPath: "../../fixtures",
     cypressRunAndGenerateReportCommand: {
-        "generate-merge-report": "npx cypress run --reporter mochawesome \
-    --reporter-options reportDir='reports',overwrite=false,html=false,json=true && npx mochawesome-merge 'reports/*.json' > mochawesome.json"},
+        "test": "npm install && npx cypress run --reporter mochawesome --reporter-options reportDir=results,overwrite=false,html=false,json=true",
+        "generate-report": "npx mochawesome-merge 'results/*.json' > mochawesome.json",
+        "merge-report": "npx marge mochawesome.json"
+    },
     cypressRunCommand: "npx cypress run",
     contentTypesSupportsFileUploadAndDownload: [
         "application/octet-stream",
@@ -45,33 +49,34 @@ export const constants = {
     pretteierPackage: "npm install --save-dev --save-exact prettier",
     reportingPackages: "npm install --save-dev mochawesome mochawesome-merge mochawesome-report-generator",
     pretterierFormatAllFiles: "npx prettier . --write",
-    pretteierConfig: `  { "trailingComma": "es5", 
+    pretteierConfig: ` { 
+                            "trailingComma": "es5", 
                             "tabWidth": 4, 
                             "semi": true, 
                             "singleQuote": true 
                         }`,
     cypressFileExtension: ".cy.js",
     cypressEnvSyntaxIncode: `Cypress.env("CYPRESS_BASE_URL")`,
-    cypressConfig: ` const { defineConfig } = require("cypress");
-                        module.exports = defineConfig({
+    cypressConfig: `import { defineConfig } from 'cypress';
+                    export default defineConfig({
                         e2e: {
                             setupNodeEvents(on, config) {
-                                on("task", {
+                                on('task', {
                                     log(message) {
                                         console.log(message);
                                         return null;
                                     },
                                 });
                             },
-                            specPattern: "cypress/e2e/**/*.{js,jsx,ts,tsx,features}",
+                            specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx,features}',
                             supportFile: false,
-                            screenshotOnRunFailure : false,
-                            env : {
-                                CYPRESS_BASE_URL : 'CYPRESS_BASE_URL_PLACEHOLDER',
-                                fileuploadContentTypes : 'PLACEHOLDER_CONTENT_TYPES'
-                            }
+                            screenshotOnRunFailure: false,
+                            env: {
+                                CYPRESS_BASE_URL: 'CYPRESS_BASE_URL_PLACEHOLDER',
+                                fileuploadContentTypes: 'PLACEHOLDER_CONTENT_TYPES',
+                            },
                         },
-                    }) `,
+                    });`,
     reportConfig: `{
                         "reporterEnabled": "mochawesome",
                         "mochawesomeReporterOptions": {
@@ -130,4 +135,28 @@ export const constants = {
 
                     // Alternatively you can use CommonJS syntax:
                     // require('./commands')`,
+    dockerFileConfig: `
+    FROM alpine as clone
+
+    WORKDIR /app
+
+    RUN apk update && apk add --no-cache git
+    RUN git clone https://github.com/ShivasaiMandepally/cypress-codgen.git .
+
+    FROM cypress/base:latest
+    WORKDIR /app
+
+    # Copy files from the previous stage (e.g., build artifacts)
+    COPY --from=clone /app /app
+    RUN npm install
+
+    # This has to be replaced with CMD ["npm", "run", "test"] once the source code is changed.
+    CMD ["npx", "cypress", "run"]`,
+    dockerGitignoreConfig: `
+    node_modules
+    Dockerfile
+    .gitignore
+    reports
+    README.md`,
+
 };

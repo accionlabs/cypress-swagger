@@ -7,7 +7,9 @@ import {
 	writeFile,
 	removeFolder,
 	createDirIfDoesntExist,
-	executeGitCommand
+	executeGitCommand,
+	writeFileAsync,
+	readFileAsync
 } from "../util.js";
 import { createConfigFile } from "./cypress-config.js";
 import { createCustomCommandsConfig } from "./cypress-custom-commands-config.js";
@@ -47,6 +49,8 @@ export async function createCypressFolderStructure() {
 				stdio: "inherit",
 			});
 			await writeFile(".prettierrc.json", constants.pretteierConfig);
+			await writeFile("Dockerfile", constants.dockerFileConfig);
+			await writeFile(".dockerignore", constants.dockerGitignoreConfig);
 			const packageJsonPath = path.join(process.cwd(), 'package.json');
 			await readAndWriteFile(packageJsonPath);
 			console.log(`Cypress project initialized successfully `);
@@ -84,32 +88,16 @@ export async function createCypressFolderStructure() {
 	}
 }
 
-
 async function readAndWriteFile(packageJsonPath) {
-	fs.readFileSync(packageJsonPath, 'utf8', (err, data) => {
-		if (err) {
-			console.error('Error reading package.json:', err);
-			return;
-		}
-		let reportRun = constants.cypressRunAndGenerateReportCommand;
-
-		// Parse the JSON content
-		const packageJson = JSON.parse(data);
-
-		// Edit the package.json as needed
-		packageJson.scripts.test = constants.cypressRunCommand; // Example: Adding a new dependency
-		packageJson.scripts = { ...reportRun, ...packageJson.scripts };
-		packageJson["type"] = "module";
-		// Convert the modified object back to JSON
-		const updatedPackageJson = JSON.stringify(packageJson, null, 2); // The third argument (2) is the number of spaces to use for indentation
-
-		// Write the updated content back to package.json
-		fs.writeFileSync(packageJsonPath, updatedPackageJson, 'utf8', (err) => {
-			if (err) {
-				console.error('Error writing package.json:', err);
-			} else {
-				console.log('package.json updated successfully!');
-			}
-		});
-	});
+	const packageJsonData = await readFileAsync(packageJsonPath);
+	const reportRun = constants.cypressRunAndGenerateReportCommand;
+	// Parse the JSON content
+	const packageJson = await JSON.parse(packageJsonData);
+	// Edit the package.json as needed
+	// packageJson.scripts.test = await constants.cypressRunCommand; // Example: Adding a new dependency
+	packageJson.scripts = constants.cypressRunAndGenerateReportCommand;
+	packageJson["type"] = "module";
+	// Convert the modified object back to JSON
+	const updatedPackageJson = JSON.stringify(packageJson, null, 2);
+	await writeFileAsync("package.json", updatedPackageJson);
 }

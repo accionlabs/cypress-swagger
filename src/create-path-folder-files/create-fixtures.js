@@ -491,11 +491,8 @@ export async function createBackupForFixtures(filePath) {
 	// Read the contents of the existing file
 	await changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 	try {
-
 		const fileData = await readFileAsync(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}.json`);
-
 		const backupFilePath = `${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}_backup.json`;
-
 		await writeFileAsync(backupFilePath, fileData);
 		// readFileAsync(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}.json`, 'utf8', async (err, data) => {
 		// 	if (err) {
