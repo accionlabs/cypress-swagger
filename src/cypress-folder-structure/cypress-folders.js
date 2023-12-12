@@ -74,6 +74,8 @@ export async function createCypressFolderStructure() {
 			await cloneRepository();
 			await changeDirectory(constants.repoNameForOutputGeneration);
 			await executeGitCommand(`git checkout -b ${constants.branchName} ${constants.masterBranchName}`, `New branch "${constants.branchName}" created.`);
+			const packageJsonPath = path.join(process.cwd(), 'package.json');
+			await readAndWriteFile(packageJsonPath);
 			await createFilesAndFoldersForTagsAndOperations();
 		}
 	} catch (err) {

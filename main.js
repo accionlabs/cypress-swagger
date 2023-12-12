@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config({
     path: "./env"
 });
-import { initiateSwaggerToCypress } from "./set-data-and-validation/setDataAndValidate.js";
+import { initiateSwaggerToCypress } from "./src/set-data-and-validation/setDataAndValidate.js";
 // let args = process.argv.splice(2);
 
 export async function init() {
