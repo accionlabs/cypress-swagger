@@ -6,10 +6,7 @@ dotenv.config({
     path: `./env.${environment}`
 });
 
-export async function init() {
+export async function initCodeGen() {
     await initiateSwaggerToCypress();
 }
 
-if (process.env.PRODUCTION == "false") {
-    init();
-}

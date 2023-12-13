@@ -19,6 +19,7 @@ export const constants = {
     swaggerPathFile: process.env.SWAGGERFILE_PATH,
     operation: process.env.OPERATION,
     serverUrl: process.env.SERVER_URL,
+    configFilePath: "",
     npmPackage: `npm init -y`,
     updateInfo: [],
     cypressPackage: `npm install --save cypress config`,

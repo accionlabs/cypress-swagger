@@ -113,7 +113,7 @@ async function readJsonFile(filePath) {
 export async function initiateSwaggerToCypress() {
 	await checkIfOperationIsUpdateAndSetConstants();
 	await checkIfCommandLineArgs();
-	console.log(constants.swaggerPathFile);
+
 	openAPISpec.swaggerParsedObject = await SwaggerParser.parse(constants.swaggerPathFile);
 	openAPISpec.swaggerParsedObject = await SwaggerParser.dereference(
 		openAPISpec.swaggerParsedObject
@@ -191,8 +191,8 @@ export async function formatAllFilesInProject() {
 
 async function checkIfOperationIsUpdateAndSetConstants() {
 
-	if (process.argv[2] != undefined) {
-		readJsonFile(process.argv[2])
+	if (constants.configFilePath != "") {
+		readJsonFile(constants.configFilePath)
 			.then(async (data) => {
 				constants.operation = data.operation;
 				constants.projectPath = data.swaggerOutputFilePath;
