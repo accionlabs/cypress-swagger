@@ -98,7 +98,7 @@ export const handler = async (event) => {
     }
 };
 
-(async () => {
-    handler({ id: "10009" })
-})();
+// (async () => {
+//     handler({ id: "10009" })
+// })();
 
