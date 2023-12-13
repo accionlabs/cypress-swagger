@@ -550,12 +550,11 @@ export async function filterOutJSONBasedOnUpdateOptions(currentPathArrObject, op
 	currentPathArrObject = filter(
 		currentPathArrObject,
 		(path) => {
-
 			return options.some((option) => {
-				if (path.operationId == option?.operationId || (path.tags == option.tags && option.methods.indexOf(path.methodName) > -1 && option.apiEndpoint == path.apiEndpoint)) {
+				if (path.operationId == option?.operationId || (JSON.stringify(path.tags) == JSON.stringify(option.tags) && option.methods.indexOf(path.methodName) > -1 && option.apiEndpoint == path.apiEndpoint)) {
 					path["operation"] = option.operation
 				}
-				return path.operationId == option?.operationId || (path.tags == option.tags && option.methods.indexOf(path.methodName) > -1 && option.apiEndpoint == path.apiEndpoint)
+				return path.operationId == option?.operationId || (JSON.stringify(path.tags) == JSON.stringify(option.tags) && option.methods.indexOf(path.methodName) > -1 && option.apiEndpoint == path.apiEndpoint);
 			});
 		}
 	);

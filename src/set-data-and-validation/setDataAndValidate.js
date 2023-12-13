@@ -159,15 +159,12 @@ export async function initiateSwaggerToCypress() {
 	await validateServerURL(constants.serverUrl);
 	// set Base URL
 	await checkAndSetServerURLData(constants.serverUrl);
-	// set cypress project path
-	// constants.projectPath = await constants.projectPath;
 	// create cypress folder structure
 	await createCypressFolderStructure()
 		.then(async () => {
 			await formatAllFilesInProject();
 			console.log("Cypress project got created..");
 			await executeGitCommand(`git add -A .`, `Attachments added.`);
-			//await execSync(`git commit -m "commited"`);
 			await executeGitCommand(`git commit -m \\\\"${constants.commitMessageToPushInRepo}\\\\"`, `Changes committed.`);
 			await executeGitCommand(`git push origin ${constants.branchName}`, `Changes pushed to remote.`);
 			const octokit = await authenticate();
@@ -176,21 +173,14 @@ export async function initiateSwaggerToCypress() {
 		})
 		.catch((err) => {
 			console.error("Error:", err);
+			process.exit(1);
 		});
-	// })
-	// .catch((error) => {
-	// 	console.log("can't JSON config file", error);
-	// });
 }
 
 
 export async function filterDataBasedOnOperation(type) {
 	if (type == "UPDATE") {
-		// if (process.argv[2] != undefined && process.argv[2] != null) {
-		// 	readJsonFile(process.argv[2])
-		// 		.then(async (data) => {
 		openAPISpec.SwaggerPathArrObject = await filterOutJSONBasedOnUpdateOptions(openAPISpec.SwaggerPathArrObject, constants.updateInfo);
-		//})
 	}
 	else {
 		console.log("Please provide config to update your scripts.");
@@ -214,7 +204,8 @@ export async function formatAllFilesInProject() {
 
 
 async function checkIfOperationIsUpdateAndSetConstants() {
-	if (process.argv[2] != undefined && process.argv[2] != null) {
+
+	if (process.argv[2] != undefined) {
 		readJsonFile(process.argv[2])
 			.then(async (data) => {
 				constants.operation = data.operation;
@@ -223,7 +214,5 @@ async function checkIfOperationIsUpdateAndSetConstants() {
 				constants.updateInfo = data.updateInfo;
 			});
 	}
-	else {
-		console.log("Please provide config to update your scripts.");
-	}
+
 }

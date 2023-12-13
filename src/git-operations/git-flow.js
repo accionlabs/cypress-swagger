@@ -26,6 +26,7 @@ export async function cloneRepository() {
         console.log('Repository cloned successfully');
     } catch (error) {
         console.error('Error cloning repository:', error);
+        process.exit(1);
     }
 
 };
@@ -50,6 +51,7 @@ export async function raisePullRequest(octokit) {
         console.log('Pull request created:', pullRequestUrl);
     } catch (error) {
         console.error('Error creating pull request:', error.message);
+        process.exit(1);
     }
 }
 

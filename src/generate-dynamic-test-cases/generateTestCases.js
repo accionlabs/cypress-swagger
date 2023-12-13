@@ -55,6 +55,7 @@ export async function writeDynamicTestCases() {
 							const apiBaseURL = Cypress.env("CYPRESS_BASE_URL");
 							let requestInfo = JSON.parse(JSON.stringify(${requestInfo}));
 							requestInfo.url = apiBaseURL + requestInfo.url;
+							
 							describe('${path.summary}', () => {
 							  ${path.deprecated
 						? "// Please be informed that the API in this file has been deprecated and will no longer be supported."
@@ -82,17 +83,6 @@ export async function writeDynamicTestCases() {
 		console.error(`Error in processTagFolders: ${error}`);
 	}
 
-	// if (constants.operation == "CREATE") {
-	// 	changeDirectory("../../fixtures");
-	// }
-
-	// if(constants.operation == "UPDATE")
-	// {
-	// 	changeDirectory(constants.fullPathOfSwaggerGitProject+"\\cypress\\fixtures");
-	// }
-
-
-	// writeFile("swagger.json", JSON.stringify(openAPISpec.swaggerParsedObject));
 }
 
 
