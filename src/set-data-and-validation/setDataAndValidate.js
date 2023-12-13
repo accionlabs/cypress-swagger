@@ -111,12 +111,7 @@ async function readJsonFile(filePath) {
 }
 
 export async function initiateSwaggerToCypress() {
-	// check command line arguments are passed or not
-	// readJsonFile(args[0])
-	// 	.then(async (data) => {
-	// constants.cmdArgs = config;
 	await checkIfOperationIsUpdateAndSetConstants();
-
 	await checkIfCommandLineArgs();
 	console.log(constants.swaggerPathFile);
 	openAPISpec.swaggerParsedObject = await SwaggerParser.parse(constants.swaggerPathFile);
@@ -127,10 +122,7 @@ export async function initiateSwaggerToCypress() {
 		openAPISpec.swaggerParsedObject.paths,
 		"apiEndpoint"
 	);
-
-
 	await getSecuritySchema();
-
 	openAPISpec.security = await openAPISpec.swaggerParsedObject?.security
 		? openAPISpec.swaggerParsedObject?.security
 		: undefined;
@@ -139,8 +131,6 @@ export async function initiateSwaggerToCypress() {
 		openAPISpec.SwaggerPathArrObject
 	);
 
-	// console.log(openAPISpec.SwaggerPathArrObject);	
-	console.log(constants.operation);
 	await filterDataBasedOnOperation(constants.operation);
 	// set security schema as per operation id
 	await getSecurityFromPathLevelObject();
@@ -165,7 +155,7 @@ export async function initiateSwaggerToCypress() {
 			await formatAllFilesInProject();
 			console.log("Cypress project got created..");
 			await executeGitCommand(`git add -A .`, `Attachments added.`);
-			await executeGitCommand(`git commit -m \\\\"${constants.commitMessageToPushInRepo}\\\\"`, `Changes committed.`);
+			await executeGitCommand(`git commit -m "${constants.commitMessageToPushInRepo}"`, `Changes committed.`);
 			await executeGitCommand(`git push origin ${constants.branchName}`, `Changes pushed to remote.`);
 			const octokit = await authenticate();
 			console.log('authenticated to github through api succesfully');
@@ -182,10 +172,6 @@ export async function filterDataBasedOnOperation(type) {
 	if (type == "UPDATE") {
 		openAPISpec.SwaggerPathArrObject = await filterOutJSONBasedOnUpdateOptions(openAPISpec.SwaggerPathArrObject, constants.updateInfo);
 	}
-	else {
-		console.log("Please provide config to update your scripts.");
-	}
-
 }
 
 

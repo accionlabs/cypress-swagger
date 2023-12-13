@@ -2,7 +2,7 @@ import axios from "axios";
 import { existsSync, mkdirSync, createWriteStream } from 'fs';
 
 const jiraBaseUrl = "https://shivasai.atlassian.net/rest/api";
-const authHeader = 'Basic c2FpbGVlNzYxNjQ3QGdtYWlsLmNvbTpBVEFUVDN4RmZHRjA0ZDhJcGxseDlSb3JfU2JJbmVpOFNhMVYtR0pJNGhSTERLaDlJMDZYTkRaNDROUk9fNkRGXzFKblFVM0tQdDZ3NTNQNEY2Rkd3Z2s0eFhnWXhNSzF5M2hDb1pfbDhkZzIyeTlocUZmaExCcHhMckMzMGlBV2F3YXBIaXBlTEg5OGJaOUdhcTVweDFVZUNlcjIzSTQxNTZVcVFCTU9WemVqNzQwWC1VWG8zX289NjYwNkY2MjQ=';
+// const authHeader = 
 const downloadDir = 'C:/cypress-output-folder-testing';
 async function getJiraStoryMetaData(storyId) {
     const headers = {

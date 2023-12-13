@@ -1,9 +1,7 @@
-import { fileURLToPath } from "url";
 import { constants } from "../constants.js";
 import {
 	getFixtureObjectForPath,
 	getOperationsForTag,
-	customStringify
 } from "../openAPIhelperMethods.js";
 import { openAPISpec } from "../openAPISpec.js";
 import {
@@ -55,7 +53,7 @@ export async function writeDynamicTestCases() {
 							const apiBaseURL = Cypress.env("CYPRESS_BASE_URL");
 							let requestInfo = JSON.parse(JSON.stringify(${requestInfo}));
 							requestInfo.url = apiBaseURL + requestInfo.url;
-							
+
 							describe('${path.summary}', () => {
 							  ${path.deprecated
 						? "// Please be informed that the API in this file has been deprecated and will no longer be supported."
@@ -226,36 +224,10 @@ export async function getItTestCases(fixtureObjectsList, type, itSyntax) {
 
 export async function createBackup(filePath, path) {
 	// Read the contents of the existing file
-
 	await changeDirectory(path);
-
 	const fileData = await readFileAsync(filePath);
 	const backupFilePath = `${filePath}__backup`;
 	await writeFileAsync(backupFilePath, fileData);
-
-	//   fs.readFileSync(filePath, 'utf8', async(err, data) => {
-	//     if (err) {
-	//       console.error(`Error reading file: ${err.message}`);
-	//       return;
-	//     }
-	// 	console.log(process.cwd());
-	// 	await changeDirectory(path);
-	// 	// Create a backup file by appending a timestamp to the original file name
-	//     const backupFilePath = `${filePath}__backup`;
-
-	//     // Write the contents to the backup file
-	//     fs.writeFileSync(backupFilePath, data, 'utf8', (err) => {
-	//       if (err) {
-	//         console.error(`Error creating backup: ${err.message}`);
-	//         return;
-	//       }
-
-	//       console.log(`Backup created successfully at: ${backupFilePath}`);
-
-	//     });
-	//   });
-
-
 }
 
 async function doUpdateTestCasesAsPerOperation(type, path, fullPath, describeBlock, cypressFileName) {
@@ -266,18 +238,15 @@ async function doUpdateTestCasesAsPerOperation(type, path, fullPath, describeBlo
 			break;
 		case "DEPRECATED":
 			// code to be executed if expression matches DEPRECATED
-			// await changeDirectory(path);
 			await writeFile(path, describeBlock);
 			break;
 		case "DELETE":
 			// code to be executed if expression matches DELETE
-			// await changeDirectory(path);
 			await createBackup(path, fullPath);
 			await deleteFile(path);
 			break;
 		case "CREATE":
 			// code to be executed if expression matches CREATE
-			//await createDirectory(`${tag}`)
 			await changeDirectory(fullPath);
 			await writeFile(cypressFileName, describeBlock);
 			break;
@@ -287,5 +256,3 @@ async function doUpdateTestCasesAsPerOperation(type, path, fullPath, describeBlo
 	}
 
 }
-
-

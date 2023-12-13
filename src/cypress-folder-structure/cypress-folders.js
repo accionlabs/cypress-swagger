@@ -30,14 +30,10 @@ export async function createFolders(folders, parentDirectory) {
 export async function createCypressFolderStructure() {
 	try {
 		if (constants.operation == "CREATE") {
-			// await 
-			// await createDirectory(constants.projectPath);
-
 			await createDirIfDoesntExist(constants.projectPath);
 			await removeFolder(constants.repoName);
 			await cloneRepository();
 			await changeDirectory(constants.repoNameForOutputGeneration);
-			// await executeGitCommand(`git pull origin ${constants.masterBranchName}`, `Changes pulled from remote.`);
 			await executeGitCommand(`git checkout -b ${constants.branchName} ${constants.masterBranchName}`, `New branch "${constants.branchName}" created.`);
 			await executeCommandInCli(constants.npmPackage, { stdio: "inherit" });
 			await executeCommandInCli(constants.cypressPackage, { stdio: "inherit" });
@@ -54,7 +50,6 @@ export async function createCypressFolderStructure() {
 			const packageJsonPath = path.join(process.cwd(), 'package.json');
 			await readAndWriteFile(packageJsonPath);
 			console.log(`Cypress project initialized successfully `);
-			//if (checkIfFolderExists(`${process.cwd()}//cypress`)) {
 			await createDirectory("cypress");
 			await createConfigFile();
 			await createReportConfig();
@@ -66,13 +61,11 @@ export async function createCypressFolderStructure() {
 			await changeDirectory("./support");
 			await createCustomCommandsConfig();
 			await createGlobalConfigE2e();
-			//}
 			await changeDirectory("../e2e");
 			await createDirectory("API_TESTING");
 			await changeDirectory("API_TESTING");
 			await createFilesAndFoldersForTagsAndOperations();
 		} else {
-			// console.log(process.cwd())
 			await changeDirectory(constants.projectPath);
 			await removeFolder(constants.repoName);
 			await cloneRepository();
@@ -89,15 +82,21 @@ export async function createCypressFolderStructure() {
 }
 
 async function readAndWriteFile(packageJsonPath) {
-	const packageJsonData = await readFileAsync(packageJsonPath);
-	const reportRun = constants.cypressRunAndGenerateReportCommand;
-	// Parse the JSON content
-	const packageJson = await JSON.parse(packageJsonData);
-	// Edit the package.json as needed
-	// packageJson.scripts.test = await constants.cypressRunCommand; // Example: Adding a new dependency
-	packageJson.scripts = constants.cypressRunAndGenerateReportCommand;
-	packageJson["type"] = "module";
-	// Convert the modified object back to JSON
-	const updatedPackageJson = JSON.stringify(packageJson, null, 2);
-	await writeFileAsync("package.json", updatedPackageJson);
+	try {
+		const packageJsonData = await readFileAsync(packageJsonPath);
+		const reportRun = constants.cypressRunAndGenerateReportCommand;
+		// Parse the JSON content
+		const packageJson = await JSON.parse(packageJsonData);
+		// Edit the package.json as needed
+		// packageJson.scripts.test = await constants.cypressRunCommand; // Example: Adding a new dependency
+		packageJson.scripts = constants.cypressRunAndGenerateReportCommand;
+		packageJson["type"] = "module";
+		// Convert the modified object back to JSON
+		const updatedPackageJson = JSON.stringify(packageJson, null, 2);
+		await writeFileAsync("package.json", updatedPackageJson);
+	}
+	catch (err) {
+		console.log("something went wrong while updating package.json.");
+		console.error(err);
+	}
 }

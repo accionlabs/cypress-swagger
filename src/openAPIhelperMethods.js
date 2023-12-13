@@ -4,7 +4,6 @@ import xml2js from "xml2js";
 
 import { openAPISpec } from "./openAPISpec.js";
 
-// import { openAPISpec } from "./openAPISpec";
 const {
 	values,
 	mapValues,

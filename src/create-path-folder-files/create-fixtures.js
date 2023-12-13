@@ -131,10 +131,6 @@ export async function createFixtureFiles() {
 			requestBodyFileNames.push(fileName);
 
 			if (constants.operation == "UPDATE") {
-				// await createBackupForFixtures(fileName);
-				// changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
-				// await writeFile(`${fileName}.json`, customStringify(data));
-
 				await doUpdateAsPerOperation(requestAndResponse.operation, fileName, customStringify(data));
 			}
 			else {
@@ -221,16 +217,6 @@ export async function createFixtureFiles() {
 
 
 			if (constants.operation == "UPDATE") {
-				// if(paramRequestAndResponse.operation == "UPDATE" || paramRequestAndResponse.operation =="DELETE")
-				// {
-
-
-				// }	
-				// await createBackupForFixtures(fileName);
-				// changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
-
-				// await writeFile(`${fileName}.json`, data);
-
 				await doUpdateAsPerOperation(paramRequestAndResponse.operation, fileName, data);
 			}
 			else {
@@ -275,11 +261,6 @@ export async function createFixtureFiles() {
 			openAPISpec.onlyResponseCombinations[index].fixtureFileName = fileName;
 			onlyResponseCombinationsFileNames.push(fileName);
 			if (constants.operation == "UPDATE") {
-
-				// await createBackupForFixtures(fileName);
-				// changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
-				// await writeFile(`${fileName}.json`, customStringify(data));
-
 				await doUpdateAsPerOperation(responseCombinationOnly.operation, fileName, customStringify(data));
 			}
 			else {
@@ -362,10 +343,6 @@ export async function createFixtureFiles() {
 			fixtureObject = addSecurityHeaders(securityHeaders, fixtureObject);
 			data = customStringify(fixtureObject);
 			if (constants.operation == "UPDATE") {
-
-				// await createBackupForFixtures(fileName);
-				// changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
-				// await writeFile(`${fileName}.json`, data);
 				await doUpdateAsPerOperation(paramAndResponse.operation, fileName, data);
 			}
 			else {
@@ -424,10 +401,6 @@ export async function writeFixtureParam(param, fileName, parentIndex, paramTypes
 	paramFileNames.push(fileName);
 	openAPISpec.paramTypesArrObjects[parentIndex].fixtureFileName = fileName;
 	if (constants.operation == "UPDATE") {
-		// await createBackupForFixtures(fileName);
-		// changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
-		// await writeFile(`${fileName}.json`, customStringify(fixtureFileData));
-
 		await doUpdateAsPerOperation(param.operation, fileName, data);
 	}
 	else {
@@ -460,9 +433,7 @@ function addSecurityHeaders(securityHeaders, fixtureFileData) {
 		switch (securityHeaders.in) {
 			case "header":
 				fixtureFileData.headers = { ...fixtureFileData.headers, ...securityHeaders.security };
-				// fixtureFileData.headers["header"] = "";
 				break;
-
 			case "query":
 				fixtureFileData.queryParam = Object.assign(
 					fixtureFileData.queryParam,
@@ -470,7 +441,6 @@ function addSecurityHeaders(securityHeaders, fixtureFileData) {
 				);
 				// Your code for handling query parameters here
 				break;
-
 			case "cookie":
 				fixtureFileData.cookie = Object.assign(
 					fixtureFileData.cookie,
@@ -478,7 +448,6 @@ function addSecurityHeaders(securityHeaders, fixtureFileData) {
 				);
 				// Your code for handling cookies here
 				break;
-
 			default:
 			// console.log("Unknown request type:", requestType);
 			// Handle unknown request types here
@@ -488,31 +457,11 @@ function addSecurityHeaders(securityHeaders, fixtureFileData) {
 }
 
 export async function createBackupForFixtures(filePath) {
-	// Read the contents of the existing file
 	await changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
 	try {
 		const fileData = await readFileAsync(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}.json`);
 		const backupFilePath = `${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}_backup.json`;
 		await writeFileAsync(backupFilePath, fileData);
-		// readFileAsync(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}.json`, 'utf8', async (err, data) => {
-		// 	if (err) {
-		// 		console.error(`Error reading file: ${err.message}`);
-		// 		return;
-		// 	}
-		// 	console.log("In backup..."+process.cwd());
-		// 	//await changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
-		// 	// Create a backup file by appending a timestamp to the original file name
-		// 	const backupFilePath = `${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}_backup.json`;
-
-		// 	// Write the contents to the backup file
-		// 	fs.writeFileSync(backupFilePath, data, 'utf8',async (err) => {
-		// 		if (err) {
-		// 		console.error(`Error creating backup: ${err.message}`);
-		// 		return;
-		// 		}
-		// 		console.log(`Backup created successfully at: ${backupFilePath}`);
-		// 	});
-		// });
 	}
 	catch (err) {
 		console.log("inside fixture " + err);

@@ -1,8 +1,6 @@
 import { execSync } from 'child_process';
 import { Octokit } from '@octokit/rest';
 import { constants } from '../constants.js';
-import { changeDirectory } from '../util.js';
-// import { config } from "dotenv";
 
 export async function authenticate() {
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;

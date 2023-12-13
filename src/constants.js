@@ -28,6 +28,7 @@ export const constants = {
     fixtureDirPath: "../../fixtures",
     cypressRunAndGenerateReportCommand: {
         "test": "npm install && npx cypress run --reporter mochawesome --reporter-options reportDir=results,overwrite=false,html=false,json=true",
+        "generate-merge-report": "npx mochawesome-merge 'results/*.json' > mochawesome.json && npx marge mochawesome.json",
         "generate-report": "npx mochawesome-merge 'results/*.json' > mochawesome.json",
         "merge-report": "npx marge mochawesome.json"
     },
