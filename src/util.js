@@ -63,6 +63,7 @@ export async function appendFile(path, data) {
 		await fs.appendFile(path, data);
 	} catch (error) {
 		console.error(error);
+		throw error;
 	}
 }
 
@@ -87,6 +88,7 @@ export async function deleteFile(filePath) {
 		}
 	} catch (err) {
 		console.error('Error deleting file:', err);
+		throw err;
 	}
 }
 
@@ -96,7 +98,8 @@ export async function executeGitCommand(command, message) {
 		console.log(message);
 	} catch (error) {
 		console.error(`Error while executing "${command}":`, error);
-		process.exit(1);
+		// process.exit(1);
+		throw error;
 	}
 }
 

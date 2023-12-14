@@ -33,6 +33,17 @@ export const constants = {
         "generate-report": "npx mochawesome-merge 'results/*.json' > mochawesome.json",
         "merge-report": "npx marge mochawesome.json"
     },
+    cypressDependenciesPackages: {
+        "ajv": "^8.12.0",
+        "config": "^3.3.9",
+        "cypress": "^13.6.1"
+    },
+    cypressDevDependenciesPackages: {
+        "mochawesome": "^7.1.3",
+        "mochawesome-merge": "^4.3.0",
+        "mochawesome-report-generator": "^6.2.0",
+        "prettier": "3.1.1"
+    },
     cypressRunCommand: "npx cypress run",
     contentTypesSupportsFileUploadAndDownload: [
         "application/octet-stream",

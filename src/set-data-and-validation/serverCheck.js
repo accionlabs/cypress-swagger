@@ -40,7 +40,8 @@ export async function checkAndSetServerURLData(serverURL) {
 			console.log(`Server URL is valid: ${serverURL}`);
 		})
 		.catch(error => {
-			console.error('Error:', error);
+			// console.error('Error:', error);
+			throw error;
 		});
 
 

@@ -22,7 +22,7 @@ async function getJiraStoryMetaData(storyId) {
         Authorization: authHeader,
         "Content-Type": "application/json",
     };
-    const response = await axios.get(`${jiraBaseUrl}/3/issue/${storyId}`, { headers });
+    const response = await axios.get(`${jiraBaseUrl}/2/issue/${storyId}`, { headers });
     return response.data.fields.attachment;
 }
 
@@ -55,8 +55,9 @@ async function downloadFiles(attachmentID) {
                 error(`Error downloading file: ${statusCode}`);
             }
         } catch (err) {
-            console.log(`Unexpected error: ${err.message}`);
-            process.exit(1);
+            // console.log(`Unexpected error: ${err.message}`);
+            // process.exit(1);
+            throw err;
         }
     });
 
@@ -65,6 +66,7 @@ async function downloadFiles(attachmentID) {
         console.log('All files downloaded successfully.');
     } catch (error) {
         console.error('Error downloading files:', error);
+        throw error;
     }
 
 }
@@ -84,7 +86,7 @@ async function init(id) {
         await downloadFiles(attachmentID);
     }
     catch (error) {
-        console.error('Error:', error);
+        throw error;
     } finally {
         await initCodeGen();
     }
@@ -93,12 +95,20 @@ async function init(id) {
 export const handler = async (event) => {
     try {
         await init(event.id);
+        return {
+            statusCode: 200,
+            body: "Success",
+        };
     } catch (error) {
-
+        return {
+            statusCode: 500,
+            body: `Error occured ${error}`,
+        };
     }
 };
 
-// (async () => {
-//     handler({ id: "10009" })
-// })();
+(async () => {
+    if (environment === "development")
+        handler({ id: "10015" })
+})();
 

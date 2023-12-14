@@ -465,6 +465,7 @@ export async function createBackupForFixtures(filePath) {
 	}
 	catch (err) {
 		console.log("inside fixture " + err);
+		throw err;
 	}
 }
 

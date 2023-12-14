@@ -22,7 +22,7 @@
 		"jsonfile": "^6.1.0",
 		"lodash": "^4.17.21",
 		"openai": "^4.20.1",
-		"prettier": "^3.1.0",
+		"prettier": "^3.1.1",
 		"xml2js": "^0.6.2"
 	},
 	"devDependencies": {

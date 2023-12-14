@@ -73,6 +73,7 @@ export async function createFilesAndFoldersForTagsAndOperations() {
 				})
 				.catch((err) => {
 					console.log("Error occured while setting data in fixture files.", err);
+					throw err;
 				})
 		})
 
@@ -117,5 +118,6 @@ async function copyFile(filePath, newFilePath) {
 		console.log('File copied successfully!');
 	} catch (err) {
 		console.error('Error copying file:', err);
+		throw err;
 	}
 }

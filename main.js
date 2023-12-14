@@ -7,6 +7,12 @@ dotenv.config({
 });
 
 export async function initCodeGen() {
-    await initiateSwaggerToCypress();
+    try {
+        await initiateSwaggerToCypress();
+    }
+    catch (error) {
+        throw error;
+    }
+
 }
 

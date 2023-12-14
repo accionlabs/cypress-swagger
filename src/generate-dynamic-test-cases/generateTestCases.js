@@ -67,6 +67,7 @@ export async function writeDynamicTestCases() {
 						await doUpdateTestCasesAsPerOperation(path.operation, filePath, constants.fullPathOfSwaggerGitProject + "\\cypress\\e2e\\API_TESTING\\" + tag, describeBlock, cypressFileName);
 					} catch (err) {
 						console.error(`Error processing file ${cypressFileName}: ${err}`);
+						throw err;
 					}
 				} else {
 					await writeFile(cypressFileName, describeBlock);
@@ -79,6 +80,7 @@ export async function writeDynamicTestCases() {
 		}
 	} catch (error) {
 		console.error(`Error in processTagFolders: ${error}`);
+		throw error;
 	}
 
 }

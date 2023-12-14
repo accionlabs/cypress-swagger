@@ -36,14 +36,14 @@ export async function createCypressFolderStructure() {
 			await changeDirectory(constants.repoNameForOutputGeneration);
 			await executeGitCommand(`git checkout -b ${constants.branchName} ${constants.masterBranchName}`, `New branch "${constants.branchName}" created.`);
 			await executeCommandInCli(constants.npmPackage, { stdio: "inherit" });
-			await executeCommandInCli(constants.cypressPackage, { stdio: "inherit" });
-			await executeCommandInCli(constants.ajyPackage, { stdio: "inherit" });
-			await executeCommandInCli(constants.pretteierPackage, {
-				stdio: "inherit",
-			});
-			await executeCommandInCli(constants.reportingPackages, {
-				stdio: "inherit",
-			});
+			// await executeCommandInCli(constants.cypressPackage, { stdio: "inherit" });
+			// await executeCommandInCli(constants.ajyPackage, { stdio: "inherit" });
+			// await executeCommandInCli(constants.pretteierPackage, {
+			// 	stdio: "inherit",
+			// });
+			// await executeCommandInCli(constants.reportingPackages, {
+			// 	stdio: "inherit",
+			// });
 			await writeFile(".prettierrc.json", constants.pretteierConfig);
 			await writeFile("Dockerfile", constants.dockerFileConfig);
 			await writeFile(".dockerignore", constants.dockerGitignoreConfig);
@@ -78,6 +78,7 @@ export async function createCypressFolderStructure() {
 	} catch (err) {
 		console.log("something went wrong while creating folder.");
 		console.error(err);
+		throw err;
 	}
 }
 
@@ -90,6 +91,8 @@ async function readAndWriteFile(packageJsonPath) {
 		// Edit the package.json as needed
 		// packageJson.scripts.test = await constants.cypressRunCommand; // Example: Adding a new dependency
 		packageJson.scripts = constants.cypressRunAndGenerateReportCommand;
+		packageJson["dependencies"] = constants.cypressDependenciesPackages;
+		packageJson["devDependencies"] = constants.cypressDevDependenciesPackages;
 		packageJson["type"] = "module";
 		// Convert the modified object back to JSON
 		const updatedPackageJson = JSON.stringify(packageJson, null, 2);
@@ -98,5 +101,6 @@ async function readAndWriteFile(packageJsonPath) {
 	catch (err) {
 		console.log("something went wrong while updating package.json.");
 		console.error(err);
+		throw err;
 	}
 }
