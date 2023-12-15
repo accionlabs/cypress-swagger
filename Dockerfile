@@ -35,7 +35,7 @@ WORKDIR ${FUNCTION_DIR}
 RUN apt-get update && \
     apt-get install -y git
 
-# RUN npm install -g prettier@3.1.1
+RUN npm install -g prettier@3.1.1
 
 # Set runtime interface client as default command for the container runtime
 ENTRYPOINT ["/usr/local/bin/npx", "aws-lambda-ric"]
