@@ -1,3 +1,4 @@
+import { join } from 'path';
 import { constants } from '../constants.js';
 import {
 	createExampleUsingSchema,
@@ -457,10 +458,10 @@ function addSecurityHeaders(securityHeaders, fixtureFileData) {
 }
 
 export async function createBackupForFixtures(filePath) {
-	await changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
+	await changeDirectory(join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`));
 	try {
-		const fileData = await readFileAsync(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}.json`);
-		const backupFilePath = `${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\${filePath}_backup.json`;
+		const fileData = await readFileAsync(join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `${filePath}`, `.json`));
+		const backupFilePath = join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `${filePath}`, `_backup.json`);
 		await writeFileAsync(backupFilePath, fileData);
 	}
 	catch (err) {
@@ -471,26 +472,27 @@ export async function createBackupForFixtures(filePath) {
 
 
 async function doUpdateAsPerOperation(type, fileName, data) {
+	const fixtureDir = join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`)
 	switch (type) {
 		case "UPDATE":
 			await createBackupForFixtures(fileName);
-			changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
+			changeDirectory(fixtureDir);
 			await writeFile(`${fileName}.json`, data);
 			break;
 		case "DEPRECATED":
 			// code to be executed if expression matches DEPRECATED
-			changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
+			changeDirectory(fixtureDir);
 			await writeFile(`${fileName}.json`, data);
 			break;
 		case "DELETE":
 			// code to be executed if expression matches DELETE
 			await createBackupForFixtures(fileName);
-			changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
+			changeDirectory(fixtureDir);
 			await deleteFile(`${fileName}.json`);
 			break;
 		case "CREATE":
 			// code to be executed if expression matches CREATE
-			changeDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\fixtures\\`);
+			changeDirectory(fixtureDir);
 			await writeFile(`${fileName}.json`, data);
 			break;
 		// more cases as needed

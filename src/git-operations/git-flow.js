@@ -39,7 +39,7 @@ export async function raisePullRequest(octokit) {
         const response = await octokit.pulls.create({
             owner,
             repo,
-            title: 'Pull Request Title',
+            title: `The PR raised by the codegen corresponds to the "${constants.branchName}" story.`,
             head: `${constants.branchName}`,
             base: `${constants.masterBranchName}`,
             body: 'Description of the changes',

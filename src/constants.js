@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { join } from 'path';
 // Load environment variables from .env file
 const environment = process.env.ENV || "development";
 
@@ -9,7 +10,7 @@ dotenv.config({
 export const constants = {
     projectPath: process.env.SWAGGER_OUTPUT_FILE_PATH,
     repoNameForOutputGeneration: "",
-    fullPathOfSwaggerGitProject: `${process.env.SWAGGER_OUTPUT_FILE_PATH}//${process.env.REPO_NAME}`,
+    fullPathOfSwaggerGitProject: join(`${process.env.SWAGGER_OUTPUT_FILE_PATH}`, `${process.env.REPO_NAME}`),
     commitMessageToPushInRepo: process.env.COMMIT_MESSAGE_TO_PUSHINREPO,
     repoOwner: process.env.REPO_OWNER,
     repoName: process.env.REPO_NAME,

@@ -17,6 +17,7 @@ import { createDataToSetInFixtureFile } from "./create-fixtures.js";
 import fs from 'fs';
 import jsonfile from 'jsonfile';
 import yaml from 'js-yaml';
+import { join } from "path";
 
 export async function createTagFolders(paths) {
 	let tagFolders = await getTagsFolders(paths);
@@ -30,9 +31,10 @@ export async function createTagFolders(paths) {
 
 	if (constants.operation == "UPDATE") {
 		await tagFolders.forEach(async (tag) => {
-			if (!await checkIfFolderExists(`${constants.fullPathOfSwaggerGitProject}\\cypress\\e2e\\API_TESTING\\${tag}\\`)) {
+			const tagFolderPath = join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `e2e`, `API_TESTING`, `${tag}`)
+			if (!await checkIfFolderExists(tagFolderPath)) {
 				console.log("Inside tag UPDATE..");
-				await createDirectory(`${constants.fullPathOfSwaggerGitProject}\\cypress\\e2e\\API_TESTING\\${tag}\\`, { recursive: true });
+				await createDirectory(tagFolderPath, { recursive: true });
 			}
 		});
 	}
@@ -67,7 +69,7 @@ export async function createFilesAndFoldersForTagsAndOperations() {
 					await writeDynamicTestCases()
 						.then(async () => {
 							const originalFilePath = constants.swaggerPathFile;
-							const newFilePath = `${constants.fullPathOfSwaggerGitProject}//cypress//fixtures//swagger.json`;
+							const newFilePath = join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `swagger.json`);
 							await copyFile(originalFilePath, newFilePath);
 						});
 				})

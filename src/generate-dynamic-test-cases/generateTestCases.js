@@ -9,7 +9,7 @@ import {
 	writeFileAsync,
 	deleteFile
 } from "../util.js";
-
+import { join } from "path";
 
 export async function writeDynamicTestCases() {
 	if (constants.operation == "CREATE") {
@@ -63,8 +63,8 @@ export async function writeDynamicTestCases() {
 
 				if (constants.operation == "UPDATE") {
 					try {
-						let filePath = constants.fullPathOfSwaggerGitProject + "\\cypress\\e2e\\API_TESTING\\" + tag + "\\" + cypressFileName;
-						await doUpdateTestCasesAsPerOperation(path.operation, filePath, constants.fullPathOfSwaggerGitProject + "\\cypress\\e2e\\API_TESTING\\" + tag, describeBlock, cypressFileName);
+						let filePath = join(constants.fullPathOfSwaggerGitProject, `cypress`, `e2e`, `API_TESTING`, tag, cypressFileName);
+						await doUpdateTestCasesAsPerOperation(join(path.operation, filePath, constants.fullPathOfSwaggerGitProject, `cypress`, `e2e`, `API_TESTING`, tag, describeBlock, cypressFileName));
 					} catch (err) {
 						console.error(`Error processing file ${cypressFileName}: ${err}`);
 						throw err;
