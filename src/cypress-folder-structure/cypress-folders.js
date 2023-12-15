@@ -31,15 +31,16 @@ export async function createCypressFolderStructure() {
 	try {
 		const gitUserName = process.env.GIT_USER_NAME;
 		const githubToken = process.env.GITHUB_TOKEN;
-		const command = `git config --global credential.helper '!f() { echo "username=${gitUserName}"; echo "password=${githubToken}"; }; f'`;
+		const command = `git config --local credential.helper '!f() { echo "username=${gitUserName}"; echo "password=${githubToken}"; }; f'`;
 		if (constants.operation == "CREATE") {
 			await createDirIfDoesntExist(constants.projectPath);
 			await removeFolder(constants.repoName);
-			await executeGitCommand(`git config --global user.name "${process.env.GIT_USER_NAME}"`);
-			await executeGitCommand(`git config --global user.email "${process.env.GIT_USER}"`);
 			await cloneRepository();
 			await changeDirectory(constants.repoName);
+			await executeGitCommand(`git config --local user.name "${process.env.GIT_USER_NAME}"`);
+			await executeGitCommand(`git config --local user.email "${process.env.GIT_USER}"`);
 			console.log(await process.cwd());
+			// await executeCommandInCli(`chmod 777 /home/sbx_user1051/.gitconfig`);
 			// await executeGitCommand(`git config credential.helper '!f() {echo "username=${process.env.GIT_USER_NAME}"; echo "password=${process.env.GITHUB_TOKEN}"; }; f'`);
 			await executeGitCommand(command, { stdio: 'inherit' });
 
@@ -78,10 +79,11 @@ export async function createCypressFolderStructure() {
 		} else {
 			await changeDirectory(constants.projectPath);
 			await removeFolder(constants.repoName);
-			await executeGitCommand(`git config --global user.name "${process.env.GIT_USER_NAME}"`);
-			await executeGitCommand(`git config --global user.email "${process.env.GIT_USER}"`);
 			await cloneRepository();
 			await changeDirectory(constants.repoName);
+			await executeGitCommand(`git config --local user.name "${process.env.GIT_USER_NAME}"`);
+			await executeGitCommand(`git config --local user.email "${process.env.GIT_USER}"`);
+			// await executeCommandInCli(`chmod 777 /home/sbx_user1051/.gitconfig`);
 			await executeGitCommand(command, { stdio: 'inherit' });
 			await executeGitCommand(`git checkout -b ${constants.branchName} ${constants.masterBranchName}`, `New branch "${constants.branchName}" created.`);
 			const packageJsonPath = path.join(process.cwd(), 'package.json');
