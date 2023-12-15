@@ -119,8 +119,8 @@ export const handler = async (event) => {
     }
 };
 
-(async () => {
-    if (environment === "development")
-        handler({ id: "10015" })
-})();
+// (async () => {
+//     if (environment === "development")
+//         handler({ id: "10015" })
+// })();
 

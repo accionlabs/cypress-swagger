@@ -26,10 +26,10 @@ async function validateServers() {
 }
 
 async function checkIfCommandLineArgs() {
-	if (constants.swaggerPathFile == undefined || constants.swaggerPathFile == "") {
-		console.log("Swagger file is not passed in command line arguments.");
-		process.exit(0);
-	}
+	// if (constants.swaggerPathFile == undefined || constants.swaggerPathFile == "") {
+	// 	console.log("Swagger file is not passed in command line arguments.");
+	// 	process.exit(0);
+	// }
 
 	if (constants.projectPath == undefined || constants.projectPath == "") {
 		console.log("File path to save cypress project is not provided.");
