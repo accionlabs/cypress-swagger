@@ -17,10 +17,10 @@ export async function authenticate() {
 
 export async function cloneRepository() {
     const projectDir = constants.repoUrlInWhichOutputTobePushed.split('/').pop();
-    constants.repoNameForOutputGeneration = projectDir.substring(0, projectDir.length - 4);
+    // constants.repoNameForOutputGeneration = projectDir.substring(0, projectDir.length - 4);
     try {
-        console.log(`Cloning repository: ${constants.repoUrlInWhichOutputTobePushed}`);
-        await execSync(`git clone ${constants.repoUrlInWhichOutputTobePushed}`);
+        console.log(`Cloning repository: ${constants.repoUrlInWhichOutputTobePushed} ${constants.repoName}`);
+        await execSync(`git clone ${constants.repoUrlInWhichOutputTobePushed} ${constants.repoName}`);
         console.log('Repository cloned successfully');
     } catch (error) {
         console.error('Error cloning repository:', error);
@@ -33,7 +33,7 @@ export async function cloneRepository() {
 export async function raisePullRequest(octokit) {
     let pullRequestUrl = '';
     let owner = constants.repoOwner;
-    let repo = constants.repoName;
+    let repo = constants.actualRepoName;
 
     try {
         const response = await octokit.pulls.create({

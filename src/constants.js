@@ -8,6 +8,7 @@ dotenv.config({
 });
 
 export const constants = {
+    actualRepoName: process.env.ACTUAL_REPO_NAME,
     projectPath: process.env.SWAGGER_OUTPUT_FILE_PATH,
     repoNameForOutputGeneration: "",
     fullPathOfSwaggerGitProject: join(`${process.env.SWAGGER_OUTPUT_FILE_PATH}`, `${process.env.REPO_NAME}`),

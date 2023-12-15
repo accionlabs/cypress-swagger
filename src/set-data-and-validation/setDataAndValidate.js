@@ -154,7 +154,7 @@ export async function initiateSwaggerToCypress() {
 		.then(async () => {
 			await formatAllFilesInProject();
 			console.log("Cypress project got created..");
-			await executeGitCommand(`git remote set-url origin https://${process.env.GIT_USER_NAME}:${process.env.GITHUB_TOKEN}@github.com/${process.env.REPO_OWNER}/${process.env.REPO_NAME}.git`);
+
 			await executeGitCommand(`git add -A .`, `Attachments added.`);
 			await executeGitCommand(`git commit -m "${constants.commitMessageToPushInRepo}"`, `Changes committed.`);
 			await executeGitCommand(`git push origin ${constants.branchName}`, `Changes pushed to remote.`);
