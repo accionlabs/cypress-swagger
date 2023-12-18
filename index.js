@@ -75,8 +75,10 @@ async function downloadFiles(attachmentID) {
 async function overwriteEnviromentVariablesForSwaggerAndConfig(filename) {
     if (filename != 'config.json') {
         constants.swaggerPathFile = join(`${process.env.SWAGGER_OUTPUT_FILE_PATH}`, `${filename}`);
+        console.log(` swagger path file ${constants.swaggerPathFile}`);
     } else {
         constants.configFilePath = join(`${process.env.SWAGGER_OUTPUT_FILE_PATH}`, `${filename}`);
+        console.log(` configFilePath file ${constants.configFilePath}`);
     }
 }
 
@@ -98,8 +100,10 @@ async function init(id) {
         constants.branchName = key;
     }
     catch (error) {
+        console.log("in error of init method..");
         throw error;
     } finally {
+        console.log(` IN finally.`);
         await initCodeGen();
     }
 }
