@@ -64,8 +64,8 @@ export async function writeDynamicTestCases() {
 
 				if (constants.operation == "UPDATE") {
 					try {
-						let filePath = join(constants.fullPathOfSwaggerGitProject, `cypress`, `e2e`, `API_TESTING`, tag, cypressFileName);
-						await doUpdateTestCasesAsPerOperation(join(path.operation, filePath, constants.fullPathOfSwaggerGitProject, `cypress`, `e2e`, `API_TESTING`, tag, describeBlock, cypressFileName));
+						let filePath = await join(constants.fullPathOfSwaggerGitProject, `cypress`, `e2e`, `API_TESTING`, tag, cypressFileName);
+						await doUpdateTestCasesAsPerOperation(path.operation, filePath, constants.fullPathOfSwaggerGitProject, describeBlock, cypressFileName);
 					} catch (err) {
 						console.error(`Error processing file ${cypressFileName}: ${err}`);
 						throw err;
@@ -228,7 +228,7 @@ export async function getItTestCases(fixtureObjectsList, type, itSyntax) {
 export async function createBackup(filePath, path) {
 	// Read the contents of the existing file
 	await changeDirectory(path);
-	if (checkIfFolderExists(`${filePath}`)) {
+	if (await checkIfFolderExists(`${filePath}`)) {
 		const fileData = await readFileAsync(filePath);
 		const backupFilePath = `${filePath}__backup`;
 		await writeFileAsync(backupFilePath, fileData);
