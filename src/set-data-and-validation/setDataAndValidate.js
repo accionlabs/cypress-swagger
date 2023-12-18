@@ -154,8 +154,8 @@ export async function initiateSwaggerToCypress() {
 		.then(async () => {
 			await formatAllFilesInProject();
 			console.log("Cypress project got created..");
-
 			await executeGitCommand(`git add -A .`, `Attachments added.`);
+			constants.commitMessageToPushInRepo = `${constants.branchName} ${constants.commitMessageToPushInRepo}`;
 			await executeGitCommand(`git commit -m "${constants.commitMessageToPushInRepo}"`, `Changes committed.`);
 			await executeGitCommand(`git push origin ${constants.branchName}`, `Changes pushed to remote.`);
 			const octokit = await authenticate();
@@ -197,8 +197,7 @@ async function checkIfOperationIsUpdateAndSetConstants() {
 		readJsonFile(constants.configFilePath)
 			.then(async (data) => {
 				constants.operation = data.operation;
-				constants.projectPath = data.swaggerOutputFilePath;
-				constants.swaggerPathFile = data.swaggerPathFile;
+				constants.projectPath = `${process.env.SWAGGER_OUTPUT_FILE_PATH}`;
 				constants.updateInfo = data.updateInfo;
 			});
 	}

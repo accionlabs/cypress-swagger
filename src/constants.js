@@ -8,19 +8,18 @@ dotenv.config({
 });
 
 export const constants = {
-    actualRepoName: process.env.ACTUAL_REPO_NAME,
     projectPath: process.env.SWAGGER_OUTPUT_FILE_PATH,
     repoNameForOutputGeneration: "",
     fullPathOfSwaggerGitProject: join(`${process.env.SWAGGER_OUTPUT_FILE_PATH}`, `${process.env.REPO_NAME}`),
-    commitMessageToPushInRepo: process.env.COMMIT_MESSAGE_TO_PUSHINREPO,
+    commitMessageToPushInRepo: process.env.COMMIT_MESSAGE,
     repoOwner: process.env.REPO_OWNER,
     repoName: process.env.REPO_NAME,
-    repoUrlInWhichOutputTobePushed: process.env.REPO_URL_IN_WHICH_OUTPUT_TO_BE_PUSHED,
+    repoUrlInWhichOutputTobePushed: process.env.REPO_URL,
     branchName: process.env.BRANCH_NAME,
     masterBranchName: process.env.MASTER_BRANCH_NAME,
     swaggerPathFile: process.env.SWAGGERFILE_PATH,
-    operation: process.env.OPERATION,
     serverUrl: process.env.SERVER_URL,
+    operation: "CREATE",
     configFilePath: "",
     npmPackage: `npm init -y`,
     updateInfo: [],

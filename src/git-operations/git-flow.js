@@ -33,7 +33,7 @@ export async function cloneRepository() {
 export async function raisePullRequest(octokit) {
     let pullRequestUrl = '';
     let owner = constants.repoOwner;
-    let repo = constants.actualRepoName;
+    let repo = constants.repoName;
 
     try {
         const response = await octokit.pulls.create({
