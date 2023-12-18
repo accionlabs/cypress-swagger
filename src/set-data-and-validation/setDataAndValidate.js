@@ -154,6 +154,7 @@ export async function initiateSwaggerToCypress() {
 		.then(async () => {
 			await formatAllFilesInProject();
 			console.log("Cypress project got created..");
+			console.log(process.cwd());
 			await executeGitCommand(`git add -A .`, `Attachments added.`);
 			constants.commitMessageToPushInRepo = `${constants.branchName} ${constants.commitMessageToPushInRepo}`;
 			await executeGitCommand(`git commit -m "${constants.commitMessageToPushInRepo}"`, `Changes committed.`);
@@ -180,7 +181,7 @@ export async function filterDataBasedOnOperation(type) {
 
 
 export async function formatAllFilesInProject() {
-	await changeDirectory("../../../");
+	await changeDirectory(constants.fullPathOfSwaggerGitProject);
 	try {
 		await executeCommandInCli(constants.pretterierFormatAllFiles, {
 			stdio: "inherit",

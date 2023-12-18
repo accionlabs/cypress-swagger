@@ -460,8 +460,8 @@ function addSecurityHeaders(securityHeaders, fixtureFileData) {
 export async function createBackupForFixtures(filePath) {
 	await changeDirectory(join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`));
 	try {
-		const fileData = await readFileAsync(join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `${filePath}`, `.json`));
-		const backupFilePath = join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `${filePath}`, `_backup.json`);
+		const fileData = await readFileAsync(join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `${filePath}.json`));
+		const backupFilePath = join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `${filePath}_backup.json`);
 		await writeFileAsync(backupFilePath, fileData);
 	}
 	catch (err) {
