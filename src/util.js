@@ -116,3 +116,12 @@ export async function removeFolder(folderPath) {
 		console.error('Error while removing folder :', error.message);
 	}
 }
+
+export async function checkGitStatus(command) {
+	try {
+		const result = execSync(`${command}`, { encoding: 'utf-8' }).toString();
+		return !result.includes('nothing to commit, working tree clean');
+	} catch (error) {
+		console.error('Error:', error.stderr.toString());
+	}
+}

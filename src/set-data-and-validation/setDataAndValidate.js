@@ -9,7 +9,7 @@ import {
 } from "../openAPIhelperMethods.js";
 import { openAPISpec } from "../openAPISpec.js";
 import { checkAndSetServerURLData, validateServerURL } from "./serverCheck.js";
-import { changeDirectory, executeCommandInCli, executeGitCommand } from "../util.js";
+import { changeDirectory, executeCommandInCli, executeGitCommand, checkGitStatus } from "../util.js";
 import { execSync } from "child_process";
 import { authenticate, raisePullRequest } from "../git-operations/git-flow.js";
 
@@ -154,16 +154,24 @@ export async function initiateSwaggerToCypress() {
 		.then(async () => {
 			await formatAllFilesInProject();
 			console.log("Cypress project got created..");
-			console.log(process.cwd());
-			await executeGitCommand(`git add -A .`, `Attachments added.`);
-			console.log(`before changing commit message ${constants.commitMessageToPushInRepo}`);
-			constants.commitMessageToPushInRepo = `${constants.branchName} ${constants.commitMessageToPushInRepo}`;
-			console.log(`after changing commit message ${constants.commitMessageToPushInRepo}`);
-			await executeGitCommand(`git commit -m "${constants.commitMessageToPushInRepo}"`, `Changes committed.`);
-			await executeGitCommand(`git push origin ${constants.branchName}`, `Changes pushed to remote.`);
-			const octokit = await authenticate();
-			console.log('authenticated to github through api succesfully');
-			await raisePullRequest(octokit);
+			const gitStatus = await checkGitStatus(`git status`);
+			if (gitStatus) {
+
+
+				await executeGitCommand(`git add -A .`, `Attachments added.`);
+				console.log(`before changing commit message ${constants.commitMessageToPushInRepo}`);
+				constants.commitMessageToPushInRepo = `${constants.branchName} ${constants.commitMessageToPushInRepo}`;
+				console.log(`after changing commit message ${constants.commitMessageToPushInRepo}`);
+				await executeGitCommand(`git commit -m "${constants.commitMessageToPushInRepo}"`, `Changes committed.`);
+				await executeGitCommand(`git push origin ${constants.branchName}`, `Changes pushed to remote.`);
+				const octokit = await authenticate();
+				console.log('authenticated to github through api succesfully');
+				await raisePullRequest(octokit);
+			}
+			else {
+				console.log("No changes to commit.");
+				return;
+			}
 		})
 		.catch((err) => {
 			console.error("Error:", err);
