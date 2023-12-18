@@ -7,7 +7,8 @@ import { openAPISpec } from "../openAPISpec.js";
 import {
 	changeDirectory, writeFile, readFileAsync,
 	writeFileAsync,
-	deleteFile
+	deleteFile,
+	checkIfFolderExists
 } from "../util.js";
 import { join } from "path";
 
@@ -227,9 +228,11 @@ export async function getItTestCases(fixtureObjectsList, type, itSyntax) {
 export async function createBackup(filePath, path) {
 	// Read the contents of the existing file
 	await changeDirectory(path);
-	const fileData = await readFileAsync(filePath);
-	const backupFilePath = `${filePath}__backup`;
-	await writeFileAsync(backupFilePath, fileData);
+	if (checkIfFolderExists(`${filePath}`)) {
+		const fileData = await readFileAsync(filePath);
+		const backupFilePath = `${filePath}__backup`;
+		await writeFileAsync(backupFilePath, fileData);
+	}
 }
 
 async function doUpdateTestCasesAsPerOperation(type, path, fullPath, describeBlock, cypressFileName) {

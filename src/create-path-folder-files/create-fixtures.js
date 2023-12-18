@@ -18,7 +18,8 @@ import {
 	writeFile,
 	readFileAsync,
 	writeFileAsync,
-	deleteFile
+	deleteFile,
+	checkIfFolderExists
 } from '../util.js';
 
 
@@ -460,9 +461,13 @@ function addSecurityHeaders(securityHeaders, fixtureFileData) {
 export async function createBackupForFixtures(filePath) {
 	await changeDirectory(join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`));
 	try {
-		const fileData = await readFileAsync(join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `${filePath}.json`));
-		const backupFilePath = join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `${filePath}_backup.json`);
-		await writeFileAsync(backupFilePath, fileData);
+		const fixtureFilePath = join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `${filePath}.json`);
+		if (checkIfFolderExists(fixtureFilePath)) {
+			const fileData = await readFileAsync();
+			const backupFilePath = join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `${filePath}_backup.json`);
+			await writeFileAsync(backupFilePath, fileData);
+		}
+
 	}
 	catch (err) {
 		console.log("inside fixture " + err);
