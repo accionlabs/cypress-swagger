@@ -56,8 +56,6 @@ export async function createCypressFolderStructure() {
 			// 	stdio: "inherit",
 			// });
 			await writeFile(".prettierrc.json", constants.pretteierConfig);
-			await writeFile("Dockerfile", constants.dockerFileConfig);
-			await writeFile(".dockerignore", constants.dockerGitignoreConfig);
 			const packageJsonPath = path.join(process.cwd(), 'package.json');
 			await readAndWriteFile(packageJsonPath);
 			console.log(`Cypress project initialized successfully `);

@@ -156,7 +156,9 @@ export async function initiateSwaggerToCypress() {
 			console.log("Cypress project got created..");
 			console.log(process.cwd());
 			await executeGitCommand(`git add -A .`, `Attachments added.`);
+			console.log(`before changing commit message ${constants.commitMessageToPushInRepo}`);
 			constants.commitMessageToPushInRepo = `${constants.branchName} ${constants.commitMessageToPushInRepo}`;
+			console.log(`after changing commit message ${constants.commitMessageToPushInRepo}`);
 			await executeGitCommand(`git commit -m "${constants.commitMessageToPushInRepo}"`, `Changes committed.`);
 			await executeGitCommand(`git push origin ${constants.branchName}`, `Changes pushed to remote.`);
 			const octokit = await authenticate();
