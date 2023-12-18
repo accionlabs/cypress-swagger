@@ -463,7 +463,7 @@ export async function createBackupForFixtures(filePath) {
 	try {
 		const fixtureFilePath = join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `${filePath}.json`);
 		if (checkIfFolderExists(fixtureFilePath)) {
-			const fileData = await readFileAsync();
+			const fileData = await readFileAsync(fixtureFilePath);
 			const backupFilePath = join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`, `${filePath}_backup.json`);
 			await writeFileAsync(backupFilePath, fileData);
 		}
