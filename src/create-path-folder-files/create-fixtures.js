@@ -493,7 +493,8 @@ async function doUpdateAsPerOperation(type, fileName, data) {
 			// code to be executed if expression matches DELETE
 			await createBackupForFixtures(fileName);
 			changeDirectory(fixtureDir);
-			await deleteFile(`${fileName}.json`);
+			const deleteFilePath = join(`${fixtureDir}`, `${fileName}.json`);
+			await deleteFile(`${deleteFilePath}`);
 			break;
 		case "CREATE":
 			// code to be executed if expression matches CREATE
