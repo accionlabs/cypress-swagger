@@ -252,8 +252,7 @@ async function doUpdateTestCasesAsPerOperation(type, path, fullPath, describeBlo
 			break;
 		case "CREATE":
 			// code to be executed if expression matches CREATE
-			await changeDirectory(fullPath);
-			await writeFile(cypressFileName, describeBlock);
+			await writeFile(path, describeBlock);
 			break;
 		// more cases as needed
 		default:

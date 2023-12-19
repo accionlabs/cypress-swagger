@@ -107,7 +107,7 @@ export async function executeGitCommand(command, message) {
 export async function removeFolder(folderPath) {
 	try {
 		if (await checkIfFolderExists(folderPath)) {
-			await fs.rmdirSync(folderPath, { recursive: true });
+			await fs.rmSync(folderPath, { recursive: true });
 			console.log('Folder and its contents removed successfully.');
 		} else {
 			console.log('Folder does not exist.');
