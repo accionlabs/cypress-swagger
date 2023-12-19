@@ -79,6 +79,7 @@ export async function readFileAsync(filePath) {
 export async function deleteFile(filePath) {
 	try {
 		// Use fs.unlinkSync to delete the file synchronously
+		console.log(await checkIfFolderExists(filePath));
 		if (await checkIfFolderExists(filePath)) {
 			await fs.unlinkSync(filePath);
 			console.log('File deleted successfully');

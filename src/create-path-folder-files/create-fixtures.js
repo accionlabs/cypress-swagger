@@ -481,24 +481,24 @@ async function doUpdateAsPerOperation(type, fileName, data) {
 	switch (type) {
 		case "UPDATE":
 			await createBackupForFixtures(fileName);
-			changeDirectory(fixtureDir);
+			await changeDirectory(fixtureDir);
 			await writeFile(`${fileName}.json`, data);
 			break;
 		case "DEPRECATED":
 			// code to be executed if expression matches DEPRECATED
-			changeDirectory(fixtureDir);
+			await changeDirectory(fixtureDir);
 			await writeFile(`${fileName}.json`, data);
 			break;
 		case "DELETE":
 			// code to be executed if expression matches DELETE
 			await createBackupForFixtures(fileName);
-			changeDirectory(fixtureDir);
+			await changeDirectory(fixtureDir);
 			const deleteFilePath = join(`${fixtureDir}`, `${fileName}.json`);
 			await deleteFile(`${deleteFilePath}`);
 			break;
 		case "CREATE":
 			// code to be executed if expression matches CREATE
-			changeDirectory(fixtureDir);
+			await changeDirectory(fixtureDir);
 			await writeFile(`${fileName}.json`, data);
 			break;
 		// more cases as needed
