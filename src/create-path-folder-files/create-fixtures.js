@@ -27,37 +27,44 @@ export async function createDataToSetInFixtureFile() {
 	let pathObject = openAPISpec.SwaggerPathArrObject;
 	let paramTypesArrObjects = [];
 	let allRequestAndResponseCombinationsArrObjects = [];
-	pathObject.forEach(async (path) => {
+
+	for (const path of pathObject) {
 		let paramTypeObject = await getParamTypeFromPathObject(path.parameters);
 		let combinations = [];
+
 		if (Object.keys(paramTypeObject).length !== 0) {
 			paramTypeObject.operationId = path.operationId;
 			paramTypeObject.apiEndpoint = path.apiEndpoint;
 			paramTypeObject.operation = path.operation ? path.operation : "CREATE";
 			paramTypesArrObjects.push(paramTypeObject);
-
 		}
+
 		combinations = await getAllCombinationsForRequestbodyAndResponse(path);
 		allRequestAndResponseCombinationsArrObjects = await mergeArrayOfObjects(
 			allRequestAndResponseCombinationsArrObjects,
 			combinations
 		);
 
-		allRequestAndResponseCombinationsArrObjects = allRequestAndResponseCombinationsArrObjects.map(obj => ({ ...obj, ["operation"]: path.operation ? path.operation : "CREATE" }));
+		allRequestAndResponseCombinationsArrObjects = allRequestAndResponseCombinationsArrObjects.map(obj => ({
+			...obj,
+			["operation"]: path.operation ? path.operation : "CREATE"
+		}));
+	}
 
-
-	});
 	openAPISpec.paramTypesArrObjects = paramTypesArrObjects;
-	openAPISpec.allRequestAndResponseCombinationsArrObjects = await
-		allRequestAndResponseCombinationsArrObjects;
+	openAPISpec.allRequestAndResponseCombinationsArrObjects = allRequestAndResponseCombinationsArrObjects;
+
 	await setPathParamAndRequestAndResponseMergedObjects();
 	openAPISpec.paramAndResponseTypedArray = await mergeParamAndResponseCombinations();
 	await getOnlyResponseCombinations();
+
 	if (constants.operation == "CREATE") {
 		await changeDirectory(constants.fixtureDirPath);
 	}
+
 	await createFixtureFiles();
 }
+
 
 export async function createFixtureFiles() {
 	let fileName;
@@ -136,12 +143,12 @@ export async function createFixtureFiles() {
 				await doUpdateAsPerOperation(requestAndResponse.operation, fileName, customStringify(data));
 			}
 			else {
-
 				await writeFile(`${fileName}.json`, customStringify(data));
 			}
 		}
 	);
 	openAPISpec.requestFixtureBodyFileNames = requestBodyFileNames;
+
 
 	openAPISpec.paramAndRequestAndResponse.forEach(
 		async (paramRequestAndResponse, index) => {
@@ -177,6 +184,7 @@ export async function createFixtureFiles() {
 					.replace("/", "_")
 					.replaceAll("*", "")
 				: "";
+
 			let fileName = `${paramRequestAndResponse.responseStatusCode
 				? paramRequestAndResponse.responseStatusCode
 				: "default"
@@ -229,6 +237,7 @@ export async function createFixtureFiles() {
 	openAPISpec.paramRequestAndResponseFileNames =
 		paramRequestAndResponseFileNames;
 
+
 	openAPISpec.onlyResponseCombinations.forEach(
 		async (responseCombinationOnly, index) => {
 			let responseContentType = responseCombinationOnly.contentType
@@ -273,6 +282,7 @@ export async function createFixtureFiles() {
 
 	openAPISpec.onlyResponseCombinationsFileNames =
 		onlyResponseCombinationsFileNames;
+
 
 	openAPISpec.paramAndResponseTypedArray.forEach(
 		async (paramAndResponse, index) => {
@@ -342,6 +352,7 @@ export async function createFixtureFiles() {
 					paramAndResponseFileNames.push(fileName);
 				});
 			});
+
 			fixtureObject = addSecurityHeaders(securityHeaders, fixtureObject);
 			data = customStringify(fixtureObject);
 			if (constants.operation == "UPDATE") {
@@ -352,9 +363,9 @@ export async function createFixtureFiles() {
 			}
 		}
 	);
+
 	openAPISpec.paramAndResponseFileNames =
 		paramAndResponseFileNames;
-
 
 }
 
@@ -406,10 +417,13 @@ export async function writeFixtureParam(param, fileName, parentIndex, paramTypes
 		await doUpdateAsPerOperation(param.operation, fileName, data);
 	}
 	else {
+
 		await writeFile(`${fileName}.json`, customStringify(fixtureFileData));
 	}
 
 	openAPISpec.paramFixtureFileNames = paramFileNames;
+
+
 }
 
 function customStringify(obj, replacer = null, space = 2) {
@@ -492,7 +506,6 @@ async function doUpdateAsPerOperation(type, fileName, data) {
 		case "DELETE":
 			// code to be executed if expression matches DELETE
 			const deleteFilePath = join(`${fixtureDir}`, `${fileName}.json`);
-			console.log(deleteFilePath);
 			await deleteFile(`${deleteFilePath}`);
 			break;
 		case "CREATE":

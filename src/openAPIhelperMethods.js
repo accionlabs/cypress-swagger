@@ -80,49 +80,49 @@ export async function getParamTypeFromPathObject(parameters) {
 		headerArrObj = [],
 		payloadObj = {};
 
-	if (parameters != undefined) {
-		parameters.forEach(async (param) => {
+	if (await parameters !== undefined) {
+		for (const param of parameters) {
 			let obj = {};
 			switch (param.in) {
 				case "path":
-					pathParamArrObj.push(setValuesInPayloadObject(obj, param));
+					pathParamArrObj.push(await setValuesInPayloadObject(obj, param));
 					payloadObj.pathParam = pathParamArrObj;
 					payloadObj.type = "pathParam";
 					break;
 				case "query":
-					queryParamArrObj.push(setValuesInPayloadObject(obj, param));
+					queryParamArrObj.push(await setValuesInPayloadObject(obj, param));
 					payloadObj.queryParam = queryParamArrObj;
 					payloadObj.type = "queryParam";
 					break;
 				case "cookie":
-					cookieArrObj.push(setValuesInPayloadObject(obj, param));
+					cookieArrObj.push(await setValuesInPayloadObject(obj, param));
 					payloadObj.cookie = cookieArrObj;
 					payloadObj.type = "cookie";
 					break;
 				case "header":
-					headerArrObj.push(setValuesInPayloadObject(obj, param));
+					headerArrObj.push(await setValuesInPayloadObject(obj, param));
 					payloadObj.header = headerArrObj;
 					payloadObj.type = "header";
 					break;
 			}
-		});
+		}
 	}
 	return payloadObj;
 }
+
 
 export function compactObject(obj) {
 	return compact(obj);
 }
 
 export async function setValuesInPayloadObject(obj, param) {
-	obj.type = param.in;
-	obj.name = param.name ? param.name : undefined;
-	obj.schema = param.schema ? param.schema : undefined;
-	obj.example = param.example
-		? param.example
-		: createExampleUsingSchema(param.schema);
-
-	return omit(obj, undefined);
+	obj.type = await param.in;
+	obj.name = await param.name ? await param.name : undefined;
+	obj.schema = await param.schema ? await param.schema : undefined;
+	obj.example = await param.example
+		? await param.example
+		: await createExampleUsingSchema(param.schema);
+	return await omit(await obj, undefined);
 }
 
 export function flattenRequestBodyObject(requestBody) {
@@ -156,7 +156,7 @@ export function flattenRequestBodyObject(requestBody) {
 	return merge(contentArray, exampleArray);
 }
 
-export function getMergedObjects(requestBodyObj, responseObj) {
+export async function getMergedObjects(requestBodyObj, responseObj) {
 	return merge(requestBodyObj, responseObj);
 }
 
@@ -270,14 +270,14 @@ export async function getAllCombinationsForRequestbodyAndResponse(path) {
 	}
 
 	responseCombinations.forEach(async (responseCombination) => {
-		openAPISpec.responseCombinations.push(responseCombination);
+		openAPISpec.responseCombinations.push(await responseCombination);
 	});
 
 	responseCombinations.forEach(async (responseCombination) => {
-		multipleCombinationsArrObj.forEach((requestBodyObj) => {
+		multipleCombinationsArrObj.forEach(async (requestBodyObj) => {
 			if (responseCombination.operationId == requestBodyObj.operationId) {
 				allCombinations.push(
-					getMergedObjects(
+					await getMergedObjects(
 						JSON.parse(JSON.stringify(requestBodyObj)),
 						JSON.parse(JSON.stringify(responseCombination))
 					)
@@ -365,21 +365,19 @@ export async function getFixtureObjectForPath(operationId) {
 export async function setPathParamAndRequestAndResponseMergedObjects() {
 	let operationIds = [];
 
-	openAPISpec.paramTypesArrObjects.forEach((param) => {
-		openAPISpec.allRequestAndResponseCombinationsArrObjects.forEach(
-			(requestAndResponse) => {
-				if (param.operationId === requestAndResponse.operationId) {
-					openAPISpec.paramAndRequestAndResponse.push(
-						getMergedObjects(
-							JSON.parse(JSON.stringify(param)),
-							JSON.parse(JSON.stringify(requestAndResponse))
-						)
-					);
-					operationIds.push(param.operationId);
-				}
+	for (const param of openAPISpec.paramTypesArrObjects) {
+		for (const requestAndResponse of openAPISpec.allRequestAndResponseCombinationsArrObjects) {
+			if (param.operationId === requestAndResponse.operationId) {
+				openAPISpec.paramAndRequestAndResponse.push(
+					await getMergedObjects(
+						JSON.parse(JSON.stringify(param)),
+						JSON.parse(JSON.stringify(requestAndResponse))
+					)
+				);
+				operationIds.push(param.operationId);
 			}
-		);
-	});
+		}
+	}
 
 	openAPISpec.paramAndRequestAndResponse = uniqWith(
 		openAPISpec.paramAndRequestAndResponse,
@@ -387,47 +385,42 @@ export async function setPathParamAndRequestAndResponseMergedObjects() {
 	);
 	openAPISpec.allRequestAndResponseCombinationsArrObjects = reject(
 		openAPISpec.allRequestAndResponseCombinationsArrObjects,
-		(item) => {
-			return operationIds.indexOf(item.operationId) > -1;
-		}
+		(item) => operationIds.indexOf(item.operationId) > -1
 	);
 
 	openAPISpec.paramTypesArrObjects = reject(
 		openAPISpec.paramTypesArrObjects,
-		(item) => {
-			return operationIds.indexOf(item.operationId) > -1;
-		}
+		(item) => operationIds.indexOf(item.operationId) > -1
 	);
 }
+
 
 export async function mergeParamAndResponseCombinations() {
 	let paramAndResponseCombinations = [];
 	let operationIds = [];
-	openAPISpec.responseCombinations.forEach((param) => {
-		openAPISpec.paramTypesArrObjects.forEach((responseCombination) => {
+
+	for (const param of openAPISpec.responseCombinations) {
+		for (const responseCombination of openAPISpec.paramTypesArrObjects) {
 			if (param.operationId === responseCombination.operationId) {
 				paramAndResponseCombinations.push(
-					getMergedObjects(param, responseCombination)
+					await getMergedObjects(param, responseCombination)
 				);
 				operationIds.push(param.operationId);
 			}
-		});
-	});
+		}
+	}
 
-	paramAndResponseCombinations = uniqWith(
-		paramAndResponseCombinations,
-		isEqual()
-	);
-
+	paramAndResponseCombinations = uniqWith(paramAndResponseCombinations, isEqual);
 	openAPISpec.paramTypesArrObjects = reject(
 		openAPISpec.paramTypesArrObjects,
-		(item) => {
+		async (item) => {
 			return operationIds.indexOf(item.operationId) > -1;
 		}
 	);
 
 	return paramAndResponseCombinations;
 }
+
 
 export async function getOnlyResponseCombinations() {
 	let allOperationsId;
