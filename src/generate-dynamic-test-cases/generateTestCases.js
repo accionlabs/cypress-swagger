@@ -247,7 +247,6 @@ async function doUpdateTestCasesAsPerOperation(type, path, fullPath, describeBlo
 			break;
 		case "DELETE":
 			// code to be executed if expression matches DELETE
-			await createBackup(path, fullPath);
 			await deleteFile(path);
 			break;
 		case "CREATE":
