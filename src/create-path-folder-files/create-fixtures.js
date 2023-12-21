@@ -66,6 +66,310 @@ export async function createDataToSetInFixtureFile() {
 }
 
 
+// export async function createFixtureFiles() {
+// 	let fileName;
+// 	let requestBodyFileNames = [],
+// 		paramRequestAndResponseFileNames = [],
+// 		onlyResponseCombinationsFileNames = [],
+// 		paramAndResponseFileNames = [];
+
+
+// 	openAPISpec.paramTypesArrObjects.forEach(async (param, index) => {
+// 		fileName =
+// 			param.operationId != undefined
+// 				? param.operationId
+// 				: concatFileName(param.apiEndpoint);
+// 		let paramKeys = param ? Object.keys(param) : "";
+// 		let paramTypes = [];
+// 		paramKeys.forEach((keys) => {
+// 			if (
+// 				keys == "pathParam" ||
+// 				keys == "queryParam" ||
+// 				keys == "cookie" ||
+// 				keys == "header"
+// 			) {
+// 				paramTypes.push(keys);
+// 			}
+// 		});
+
+// 		await writeFixtureParam(param, fileName, index, paramTypes);
+
+// 	});
+
+// openAPISpec.allRequestAndResponseCombinationsArrObjects.forEach(
+// 	async (requestAndResponse, index) => {
+// 		let requestContentType = requestAndResponse.contentType
+// 			? requestAndResponse.contentType.replace("/", "_").replaceAll("*", "")
+// 			: "";
+// 		let responseContentType = requestAndResponse.responseContentType
+// 			? requestAndResponse.responseContentType
+// 				.replace("/", "_")
+// 				.replaceAll("*", "")
+// 			: "";
+// 		let fileName = `${requestAndResponse.responseStatusCode
+// 			? requestAndResponse.responseStatusCode
+// 			: "default"
+// 			}_${responseContentType}_${requestContentType}_${requestAndResponse.operationId
+// 				? requestAndResponse.operationId
+// 				: concatFileName(requestAndResponse.apiEndpoint)
+// 			}`;
+
+// 		let statusCodeWiseValue =
+// 			requestAndResponse.statusCodes.indexOf(
+// 				requestAndResponse.responseStatusCode
+// 			) > -1
+// 				? requestAndResponse[requestAndResponse.responseStatusCode]
+// 				: requestAndResponse.customCreatedExample
+// 					? requestAndResponse.customCreatedExample
+// 					: "";
+
+// 		let data = {
+// 			headers: {
+// 				"Content-Type": requestAndResponse.contentType,
+// 				accept: requestAndResponse.responseContentType,
+// 			},
+// 			payload: statusCodeWiseValue,
+// 			responseStatusCode: requestAndResponse.responseStatusCode,
+// 			responseValue: requestAndResponse.responseValue,
+// 			responseSchema: requestAndResponse.responseSchema ? requestAndResponse.responseSchema : ""
+// 		};
+
+// 		openAPISpec.allRequestAndResponseCombinationsArrObjects[
+// 			index
+// 		].fixtureFileName = fileName;
+// 		requestBodyFileNames.push(fileName);
+
+// 		if (constants.operation == "UPDATE") {
+// 			await doUpdateAsPerOperation(requestAndResponse.operation, fileName, await customStringify(data));
+// 		}
+// 		else {
+// 			await writeFile(`${fileName}.json`, await customStringify(data));
+// 		}
+// 	}
+// );
+// openAPISpec.requestFixtureBodyFileNames = requestBodyFileNames;
+
+
+// openAPISpec.paramAndRequestAndResponse.forEach(
+// 	async (paramRequestAndResponse, index) => {
+// 		let paramKeys = paramRequestAndResponse
+// 			? Object.keys(paramRequestAndResponse)
+// 			: "";
+// 		let paramTypes = [];
+// 		let data = {};
+// 		let securitySchema = getSecurityAtPathLevelOrGlobalLevel(paramRequestAndResponse);
+// 		let securityHeaders =
+// 			securitySchema != "" && Object.keys(securitySchema).length > 0
+// 				? getSecurityHeaderWithSchma(securitySchema)
+// 				: "";
+
+// 		paramKeys.forEach((keys) => {
+// 			if (
+// 				keys == "pathParam" ||
+// 				keys == "queryParam" ||
+// 				keys == "cookie" ||
+// 				keys == "header"
+// 			) {
+// 				paramTypes.push(keys);
+// 			}
+// 		});
+
+// 		let requestContentType = paramRequestAndResponse.contentType
+// 			? paramRequestAndResponse.contentType
+// 				.replace("/", "_")
+// 				.replaceAll("*", "")
+// 			: "";
+// 		let responseContentType = paramRequestAndResponse.responseContentType
+// 			? paramRequestAndResponse.responseContentType
+// 				.replace("/", "_")
+// 				.replaceAll("*", "")
+// 			: "";
+
+// 		let fileName = `${paramRequestAndResponse.responseStatusCode
+// 			? paramRequestAndResponse.responseStatusCode
+// 			: "default"
+// 			}_${responseContentType}_${requestContentType}_${paramRequestAndResponse.operationId
+// 				? paramRequestAndResponse.operationId
+// 				: concatFileName(paramRequestAndResponse.apiEndpoint)
+// 			}`;
+
+// 		openAPISpec.paramAndRequestAndResponse[index].fixtureFileName = fileName;
+// 		let fixtureObject = {
+// 			headers: {
+// 				"Content-Type": paramRequestAndResponse.contentType,
+// 				accept: paramRequestAndResponse.responseContentType,
+// 				header: "",
+// 			},
+// 			payload: paramRequestAndResponse.responseStatusCode
+// 				? paramRequestAndResponse[paramRequestAndResponse.responseStatusCode]
+// 				: "",
+// 			responseStatusCode: paramRequestAndResponse.responseStatusCode,
+// 			responseValue: paramRequestAndResponse.responseValue,
+// 			responseSchema: paramRequestAndResponse.responseSchema ? paramRequestAndResponse.responseSchema : ""
+// 		};
+// 		paramTypes.forEach((type) => {
+// 			fixtureObject[type] = {};
+// 			paramRequestAndResponse[type].forEach(async (param) => {
+// 				if (param.type == "header") {
+// 					fixtureObject.headers.header = param.example
+// 						? param.example
+// 						: createExampleUsingSchema(param.schema);
+// 				} else {
+// 					fixtureObject[type][param.name] = param.example
+// 						? param.example
+// 						: createExampleUsingSchema(param.schema);
+// 				}
+// 				paramRequestAndResponseFileNames.push(fileName);
+// 			});
+// 		});
+// 		fixtureObject = await addSecurityHeaders(securityHeaders, fixtureObject);
+// 		data = await customStringify(fixtureObject);
+
+
+// 		if (constants.operation == "UPDATE") {
+// 			await doUpdateAsPerOperation(paramRequestAndResponse.operation, fileName, data);
+// 		}
+// 		else {
+// 			await writeFile(`${fileName}.json`, data);
+// 		}
+// 	}
+// );
+// 	openAPISpec.paramRequestAndResponseFileNames =
+// 		paramRequestAndResponseFileNames;
+
+
+// openAPISpec.onlyResponseCombinations.forEach(
+// 	async (responseCombinationOnly, index) => {
+// 		let responseContentType = responseCombinationOnly.contentType
+// 			? responseCombinationOnly.contentType.replace("/", "_")
+// 			: "";
+// 		let fileName = `${responseCombinationOnly.responseStatusCode
+// 			? responseCombinationOnly.responseStatusCode
+// 			: "default"
+// 			}_${responseContentType}_${responseCombinationOnly.operationId
+// 				? responseCombinationOnly.operationId
+// 				: concatFileName(responseCombinationOnly.apiEndpoint)
+// 			}`;
+
+// 		let securitySchema = getSecurityAtPathLevelOrGlobalLevel(responseCombinationOnly);
+// 		let securityHeaders =
+// 			securitySchema != "" && Object.keys(securitySchema).length > 0
+// 				? getSecurityHeaderWithSchma(securitySchema)
+// 				: "";
+
+// 		let data = {
+// 			headers: {
+// 				"Content-Type": responseCombinationOnly.contentType,
+// 				accept: responseCombinationOnly.responseContentType,
+// 			},
+// 			responseStatusCode: responseCombinationOnly.responseStatusCode,
+// 			responseValue: responseCombinationOnly.responseValue,
+// 			responseSchema: responseCombinationOnly.responseSchema ? responseCombinationOnly.responseSchema : ""
+// 		};
+
+// 		data = await addSecurityHeaders(securityHeaders, data);
+
+// 		openAPISpec.onlyResponseCombinations[index].fixtureFileName = fileName;
+// 		onlyResponseCombinationsFileNames.push(fileName);
+// 		if (constants.operation == "UPDATE") {
+// 			await doUpdateAsPerOperation(responseCombinationOnly.operation, fileName, await customStringify(data));
+// 		}
+// 		else {
+// 			await writeFile(`${fileName}.json`, await customStringify(data));
+// 		}
+// 	}
+// );
+
+// 	openAPISpec.onlyResponseCombinationsFileNames =
+// 		onlyResponseCombinationsFileNames;
+
+
+// openAPISpec.paramAndResponseTypedArray.forEach(
+// 	async (paramAndResponse, index) => {
+// 		let paramKeys = paramAndResponse
+// 			? Object.keys(paramAndResponse)
+// 			: "";
+// 		let paramTypes = [];
+// 		let data = {};
+// 		let securitySchema = getSecurityAtPathLevelOrGlobalLevel(paramAndResponse);
+// 		let securityHeaders =
+// 			securitySchema != "" && Object.keys(securitySchema).length > 0
+// 				? getSecurityHeaderWithSchma(securitySchema)
+// 				: "";
+
+// 		paramKeys.forEach((keys) => {
+// 			if (
+// 				keys == "pathParam" ||
+// 				keys == "queryParam" ||
+// 				keys == "cookie" ||
+// 				keys == "header"
+// 			) {
+// 				paramTypes.push(keys);
+// 			}
+// 		});
+
+// 		let requestContentType = paramAndResponse.contentType
+// 			? paramAndResponse.contentType
+// 				.replace("/", "_")
+// 				.replaceAll("*", "")
+// 			: "";
+// 		let responseContentType = paramAndResponse.responseContentType
+// 			? paramAndResponse.responseContentType
+// 				.replace("/", "_")
+// 				.replaceAll("*", "")
+// 			: "";
+// 		let fileName = `${paramAndResponse.responseStatusCode
+// 			? paramAndResponse.responseStatusCode
+// 			: "default"
+// 			}_${responseContentType}_${requestContentType}_${paramAndResponse.operationId
+// 				? paramAndResponse.operationId
+// 				: concatFileName(paramAndResponse.apiEndpoint)
+// 			}`;
+
+// 		openAPISpec.paramAndResponseTypedArray[index].fixtureFileName = fileName;
+// 		let fixtureObject = {
+// 			headers: {
+// 				"Content-Type": paramAndResponse.contentType,
+// 				accept: paramAndResponse.responseContentType,
+// 				header: "",
+// 			},
+// 			responseStatusCode: paramAndResponse.responseStatusCode,
+// 			responseValue: paramAndResponse.responseValue,
+// 			responseSchema: paramAndResponse.responseSchema ? paramAndResponse.responseSchema : ""
+// 		};
+// 		paramTypes.forEach((type) => {
+// 			fixtureObject[type] = {};
+// 			paramAndResponse[type].forEach(async (param) => {
+// 				if (param.type == "header") {
+// 					fixtureObject.headers.header = param.example
+// 						? param.example
+// 						: createExampleUsingSchema(param.schema);
+// 				} else {
+// 					fixtureObject[type][param.name] = param.example
+// 						? param.example
+// 						: createExampleUsingSchema(param.schema);
+// 				}
+// 				paramAndResponseFileNames.push(fileName);
+// 			});
+// 		});
+
+// 		fixtureObject = await addSecurityHeaders(securityHeaders, fixtureObject);
+// 		data = await customStringify(fixtureObject);
+// 		if (constants.operation == "UPDATE") {
+// 			await doUpdateAsPerOperation(paramAndResponse.operation, fileName, data);
+// 		}
+// 		else {
+// 			await writeFile(`${fileName}.json`, data);
+// 		}
+// 	}
+// );
+
+// openAPISpec.paramAndResponseFileNames =
+// 	paramAndResponseFileNames;
+
+// }
+
+
 export async function createFixtureFiles() {
 	let fileName;
 	let requestBodyFileNames = [],
@@ -73,10 +377,99 @@ export async function createFixtureFiles() {
 		onlyResponseCombinationsFileNames = [],
 		paramAndResponseFileNames = [];
 
+	const writeFixtureParam = async (param, fileName, index, paramTypes) => {
+		// Implement writeFixtureParam function
+		// You need to provide the actual implementation here
 
-	openAPISpec.paramTypesArrObjects.forEach(async (param, index) => {
+		let paramFileNames = [];
+		let securitySchema = getSecurityAtPathLevelOrGlobalLevel(param);
+		let securityHeaders =
+			securitySchema != "" && Object.keys(securitySchema).length > 0
+				? getSecurityHeaderWithSchma(securitySchema)
+				: "";
+
+
+
+		let fixtureFileData = {
+			headers: {},
+			responseStatusCode: openAPISpec.paramTypesArrObjects[parentIndex]
+				.responseStatusCode
+				? openAPISpec.paramTypesArrObjects[parentIndex].responseStatusCode
+				: "",
+			responseSchema: openAPISpec.paramTypesArrObjects[parentIndex].responseSchema
+				? openAPISpec.paramTypesArrObjects[parentIndex].responseSchema
+				: "",
+			responseValue: openAPISpec.paramTypesArrObjects[parentIndex].responseValue
+				? openAPISpec.paramTypesArrObjects[parentIndex].responseValue
+				: "",
+		};
+
+		paramTypes.forEach(async (type) => {
+			fixtureFileData[type] = {};
+			param[type].forEach((param) => {
+				if (param.type == "header") {
+					fixtureFileData.headers.header = param.example
+						? param.example
+						: createExampleUsingSchema(param.schema);
+				} else {
+					fixtureFileData[type][param.name] = param.example
+						? param.example
+						: createExampleUsingSchema(param.schema);
+				}
+			});
+		});
+
+
+		fixtureFileData = await addSecurityHeaders(securityHeaders, fixtureFileData);
+
+		paramFileNames.push(fileName);
+		openAPISpec.paramTypesArrObjects[parentIndex].fixtureFileName = fileName;
+
+		await updateOrWriteFixtureFile(param.operation, fileName, fixtureFileData);
+
+		openAPISpec.paramFixtureFileNames = paramFileNames;
+	};
+
+	const addSecurityHeaders = async (securityHeaders, fixtureFileData) => {
+		if (securityHeaders != "") {
+			switch (securityHeaders.in) {
+				case "header":
+					fixtureFileData.headers = { ...fixtureFileData.headers, ...securityHeaders.security };
+					break;
+				case "query":
+					fixtureFileData.queryParam = Object.assign(
+						fixtureFileData.queryParam,
+						securityHeaders.security
+					);
+					// Your code for handling query parameters here
+					break;
+				case "cookie":
+					fixtureFileData.cookie = Object.assign(
+						fixtureFileData.cookie,
+						securityHeaders.security
+					);
+					// Your code for handling cookies here
+					break;
+				default:
+				// console.log("Unknown request type:", requestType);
+				// Handle unknown request types here
+			}
+		}
+		return fixtureFileData;
+	};
+
+	const updateOrWriteFixtureFile = async (crudOperation, fileName, data) => {
+		if (constants.operation == "UPDATE") {
+			await doUpdateAsPerOperation(crudOperation, fileName, await customStringify(data));
+		}
+		else {
+			await writeFile(`${fileName}.json`, await customStringify(data));
+		}
+	};
+
+	for (const [index, param] of openAPISpec.paramTypesArrObjects.entries()) {
 		fileName =
-			param.operationId != undefined
+			param.operationId !== undefined
 				? param.operationId
 				: concatFileName(param.apiEndpoint);
 		let paramKeys = param ? Object.keys(param) : "";
@@ -93,340 +486,315 @@ export async function createFixtureFiles() {
 		});
 
 		await writeFixtureParam(param, fileName, index, paramTypes);
+	}
 
-	});
+	for (const [index, requestAndResponse] of openAPISpec.allRequestAndResponseCombinationsArrObjects.entries()) {
+		let requestContentType = requestAndResponse.contentType
+			? requestAndResponse.contentType.replace("/", "_").replaceAll("*", "")
+			: "";
+		let responseContentType = requestAndResponse.responseContentType
+			? requestAndResponse.responseContentType
+				.replace("/", "_")
+				.replaceAll("*", "")
+			: "";
+		let fileName = `${requestAndResponse.responseStatusCode
+			? requestAndResponse.responseStatusCode
+			: "default"
+			}_${responseContentType}_${requestContentType}_${requestAndResponse.operationId
+				? requestAndResponse.operationId
+				: concatFileName(requestAndResponse.apiEndpoint)
+			}`;
 
-	openAPISpec.allRequestAndResponseCombinationsArrObjects.forEach(
-		async (requestAndResponse, index) => {
-			let requestContentType = requestAndResponse.contentType
-				? requestAndResponse.contentType.replace("/", "_").replaceAll("*", "")
-				: "";
-			let responseContentType = requestAndResponse.responseContentType
-				? requestAndResponse.responseContentType
-					.replace("/", "_")
-					.replaceAll("*", "")
-				: "";
-			let fileName = `${requestAndResponse.responseStatusCode
-				? requestAndResponse.responseStatusCode
-				: "default"
-				}_${responseContentType}_${requestContentType}_${requestAndResponse.operationId
-					? requestAndResponse.operationId
-					: concatFileName(requestAndResponse.apiEndpoint)
-				}`;
+		let statusCodeWiseValue =
+			requestAndResponse.statusCodes.indexOf(
+				requestAndResponse.responseStatusCode
+			) > -1
+				? requestAndResponse[requestAndResponse.responseStatusCode]
+				: requestAndResponse.customCreatedExample
+					? requestAndResponse.customCreatedExample
+					: "";
 
-			let statusCodeWiseValue =
-				requestAndResponse.statusCodes.indexOf(
-					requestAndResponse.responseStatusCode
-				) > -1
-					? requestAndResponse[requestAndResponse.responseStatusCode]
-					: requestAndResponse.customCreatedExample
-						? requestAndResponse.customCreatedExample
-						: "";
+		let data = {
+			headers: {
+				"Content-Type": requestAndResponse.contentType,
+				accept: requestAndResponse.responseContentType,
+			},
+			payload: statusCodeWiseValue,
+			responseStatusCode: requestAndResponse.responseStatusCode,
+			responseValue: requestAndResponse.responseValue,
+			responseSchema: requestAndResponse.responseSchema ? requestAndResponse.responseSchema : ""
+		};
 
-			let data = {
-				headers: {
-					"Content-Type": requestAndResponse.contentType,
-					accept: requestAndResponse.responseContentType,
-				},
-				payload: statusCodeWiseValue,
-				responseStatusCode: requestAndResponse.responseStatusCode,
-				responseValue: requestAndResponse.responseValue,
-				responseSchema: requestAndResponse.responseSchema ? requestAndResponse.responseSchema : ""
-			};
+		openAPISpec.allRequestAndResponseCombinationsArrObjects[
+			index
+		].fixtureFileName = fileName;
+		requestBodyFileNames.push(fileName);
 
-			openAPISpec.allRequestAndResponseCombinationsArrObjects[
-				index
-			].fixtureFileName = fileName;
-			requestBodyFileNames.push(fileName);
+		await updateOrWriteFixtureFile(requestAndResponse.operation, fileName, data);
 
-			if (constants.operation == "UPDATE") {
-				await doUpdateAsPerOperation(requestAndResponse.operation, fileName, customStringify(data));
-			}
-			else {
-				await writeFile(`${fileName}.json`, customStringify(data));
-			}
-		}
-	);
+	}
+
 	openAPISpec.requestFixtureBodyFileNames = requestBodyFileNames;
 
-
-	openAPISpec.paramAndRequestAndResponse.forEach(
-		async (paramRequestAndResponse, index) => {
-			let paramKeys = paramRequestAndResponse
-				? Object.keys(paramRequestAndResponse)
+	for (const [index, paramRequestAndResponse] of openAPISpec.paramAndRequestAndResponse.entries()) {
+		let paramKeys = paramRequestAndResponse
+			? Object.keys(paramRequestAndResponse)
+			: "";
+		let paramTypes = [];
+		let data = {};
+		let securitySchema = getSecurityAtPathLevelOrGlobalLevel(paramRequestAndResponse);
+		let securityHeaders =
+			securitySchema != "" && Object.keys(securitySchema).length > 0
+				? getSecurityHeaderWithSchma(securitySchema)
 				: "";
-			let paramTypes = [];
-			let data = {};
-			let securitySchema = getSecurityAtPathLevelOrGlobalLevel(paramRequestAndResponse);
-			let securityHeaders =
-				securitySchema != "" && Object.keys(securitySchema).length > 0
-					? getSecurityHeaderWithSchma(securitySchema)
-					: "";
 
-			paramKeys.forEach((keys) => {
-				if (
-					keys == "pathParam" ||
-					keys == "queryParam" ||
-					keys == "cookie" ||
-					keys == "header"
-				) {
-					paramTypes.push(keys);
+		paramKeys.forEach((keys) => {
+			if (
+				keys == "pathParam" ||
+				keys == "queryParam" ||
+				keys == "cookie" ||
+				keys == "header"
+			) {
+				paramTypes.push(keys);
+			}
+		});
+
+		let requestContentType = paramRequestAndResponse.contentType
+			? paramRequestAndResponse.contentType
+				.replace("/", "_")
+				.replaceAll("*", "")
+			: "";
+		let responseContentType = paramRequestAndResponse.responseContentType
+			? paramRequestAndResponse.responseContentType
+				.replace("/", "_")
+				.replaceAll("*", "")
+			: "";
+
+		let fileName = `${paramRequestAndResponse.responseStatusCode
+			? paramRequestAndResponse.responseStatusCode
+			: "default"
+			}_${responseContentType}_${requestContentType}_${paramRequestAndResponse.operationId
+				? paramRequestAndResponse.operationId
+				: concatFileName(paramRequestAndResponse.apiEndpoint)
+			}`;
+
+		openAPISpec.paramAndRequestAndResponse[index].fixtureFileName = fileName;
+		let fixtureObject = {
+			headers: {
+				"Content-Type": paramRequestAndResponse.contentType,
+				accept: paramRequestAndResponse.responseContentType,
+				header: "",
+			},
+			payload: paramRequestAndResponse.responseStatusCode
+				? paramRequestAndResponse[paramRequestAndResponse.responseStatusCode]
+				: "",
+			responseStatusCode: paramRequestAndResponse.responseStatusCode,
+			responseValue: paramRequestAndResponse.responseValue,
+			responseSchema: paramRequestAndResponse.responseSchema ? paramRequestAndResponse.responseSchema : ""
+		};
+		paramTypes.forEach((type) => {
+			fixtureObject[type] = {};
+			paramRequestAndResponse[type].forEach(async (param) => {
+				if (param.type == "header") {
+					fixtureObject.headers.header = param.example
+						? param.example
+						: createExampleUsingSchema(param.schema);
+				} else {
+					fixtureObject[type][param.name] = param.example
+						? param.example
+						: createExampleUsingSchema(param.schema);
 				}
+				paramRequestAndResponseFileNames.push(fileName);
 			});
+		});
+		fixtureObject = await addSecurityHeaders(securityHeaders, fixtureObject);
+		// data = await customStringify(fixtureObject);
 
-			let requestContentType = paramRequestAndResponse.contentType
-				? paramRequestAndResponse.contentType
-					.replace("/", "_")
-					.replaceAll("*", "")
-				: "";
-			let responseContentType = paramRequestAndResponse.responseContentType
-				? paramRequestAndResponse.responseContentType
-					.replace("/", "_")
-					.replaceAll("*", "")
-				: "";
+		await updateOrWriteFixtureFile(paramRequestAndResponse.operation, fileName, fixtureObject);
 
-			let fileName = `${paramRequestAndResponse.responseStatusCode
-				? paramRequestAndResponse.responseStatusCode
-				: "default"
-				}_${responseContentType}_${requestContentType}_${paramRequestAndResponse.operationId
-					? paramRequestAndResponse.operationId
-					: concatFileName(paramRequestAndResponse.apiEndpoint)
-				}`;
+		// Implement the rest of the code for param and request and response loop
+		// You need to provide the actual implementation here
+	}
 
-			openAPISpec.paramAndRequestAndResponse[index].fixtureFileName = fileName;
-			let fixtureObject = {
-				headers: {
-					"Content-Type": paramRequestAndResponse.contentType,
-					accept: paramRequestAndResponse.responseContentType,
-					header: "",
-				},
-				payload: paramRequestAndResponse.responseStatusCode
-					? paramRequestAndResponse[paramRequestAndResponse.responseStatusCode]
-					: "",
-				responseStatusCode: paramRequestAndResponse.responseStatusCode,
-				responseValue: paramRequestAndResponse.responseValue,
-				responseSchema: paramRequestAndResponse.responseSchema ? paramRequestAndResponse.responseSchema : ""
-			};
-			paramTypes.forEach((type) => {
-				fixtureObject[type] = {};
-				paramRequestAndResponse[type].forEach(async (param) => {
-					if (param.type == "header") {
-						fixtureObject.headers.header = param.example
-							? param.example
-							: createExampleUsingSchema(param.schema);
-					} else {
-						fixtureObject[type][param.name] = param.example
-							? param.example
-							: createExampleUsingSchema(param.schema);
-					}
-					paramRequestAndResponseFileNames.push(fileName);
-				});
-			});
-			fixtureObject = addSecurityHeaders(securityHeaders, fixtureObject);
-			data = customStringify(fixtureObject);
-
-
-			if (constants.operation == "UPDATE") {
-				await doUpdateAsPerOperation(paramRequestAndResponse.operation, fileName, data);
-			}
-			else {
-				await writeFile(`${fileName}.json`, data);
-			}
-		}
-	);
 	openAPISpec.paramRequestAndResponseFileNames =
 		paramRequestAndResponseFileNames;
+	for (const [index, responseCombinationOnly] of openAPISpec.onlyResponseCombinations.entries()) {
 
+		let responseContentType = responseCombinationOnly.contentType
+			? responseCombinationOnly.contentType.replace("/", "_")
+			: "";
+		let fileName = `${responseCombinationOnly.responseStatusCode
+			? responseCombinationOnly.responseStatusCode
+			: "default"
+			}_${responseContentType}_${responseCombinationOnly.operationId
+				? responseCombinationOnly.operationId
+				: concatFileName(responseCombinationOnly.apiEndpoint)
+			}`;
 
-	openAPISpec.onlyResponseCombinations.forEach(
-		async (responseCombinationOnly, index) => {
-			let responseContentType = responseCombinationOnly.contentType
-				? responseCombinationOnly.contentType.replace("/", "_")
+		let securitySchema = getSecurityAtPathLevelOrGlobalLevel(responseCombinationOnly);
+		let securityHeaders =
+			securitySchema != "" && Object.keys(securitySchema).length > 0
+				? getSecurityHeaderWithSchma(securitySchema)
 				: "";
-			let fileName = `${responseCombinationOnly.responseStatusCode
-				? responseCombinationOnly.responseStatusCode
-				: "default"
-				}_${responseContentType}_${responseCombinationOnly.operationId
-					? responseCombinationOnly.operationId
-					: concatFileName(responseCombinationOnly.apiEndpoint)
-				}`;
 
-			let securitySchema = getSecurityAtPathLevelOrGlobalLevel(responseCombinationOnly);
-			let securityHeaders =
-				securitySchema != "" && Object.keys(securitySchema).length > 0
-					? getSecurityHeaderWithSchma(securitySchema)
-					: "";
+		let data = {
+			headers: {
+				"Content-Type": responseCombinationOnly.contentType,
+				accept: responseCombinationOnly.responseContentType,
+			},
+			responseStatusCode: responseCombinationOnly.responseStatusCode,
+			responseValue: responseCombinationOnly.responseValue,
+			responseSchema: responseCombinationOnly.responseSchema ? responseCombinationOnly.responseSchema : ""
+		};
 
-			let data = {
-				headers: {
-					"Content-Type": responseCombinationOnly.contentType,
-					accept: responseCombinationOnly.responseContentType,
-				},
-				responseStatusCode: responseCombinationOnly.responseStatusCode,
-				responseValue: responseCombinationOnly.responseValue,
-				responseSchema: responseCombinationOnly.responseSchema ? responseCombinationOnly.responseSchema : ""
-			};
+		data = await addSecurityHeaders(securityHeaders, data);
 
-			data = addSecurityHeaders(securityHeaders, data);
+		openAPISpec.onlyResponseCombinations[index].fixtureFileName = fileName;
+		onlyResponseCombinationsFileNames.push(fileName);
+		await updateOrWriteFixtureFile(responseCombinationOnly.operation, fileName, data);
 
-			openAPISpec.onlyResponseCombinations[index].fixtureFileName = fileName;
-			onlyResponseCombinationsFileNames.push(fileName);
-			if (constants.operation == "UPDATE") {
-				await doUpdateAsPerOperation(responseCombinationOnly.operation, fileName, customStringify(data));
-			}
-			else {
-				await writeFile(`${fileName}.json`, customStringify(data));
-			}
-		}
-	);
+	}
 
 	openAPISpec.onlyResponseCombinationsFileNames =
 		onlyResponseCombinationsFileNames;
 
-
-	openAPISpec.paramAndResponseTypedArray.forEach(
-		async (paramAndResponse, index) => {
-			let paramKeys = paramAndResponse
-				? Object.keys(paramAndResponse)
+	for (const [index, paramAndResponse] of openAPISpec.paramAndResponseTypedArray.entries()) {
+		let paramKeys = paramAndResponse
+			? Object.keys(paramAndResponse)
+			: "";
+		let paramTypes = [];
+		let data = {};
+		let securitySchema = getSecurityAtPathLevelOrGlobalLevel(paramAndResponse);
+		let securityHeaders =
+			securitySchema != "" && Object.keys(securitySchema).length > 0
+				? getSecurityHeaderWithSchma(securitySchema)
 				: "";
-			let paramTypes = [];
-			let data = {};
-			let securitySchema = getSecurityAtPathLevelOrGlobalLevel(paramAndResponse);
-			let securityHeaders =
-				securitySchema != "" && Object.keys(securitySchema).length > 0
-					? getSecurityHeaderWithSchma(securitySchema)
-					: "";
 
-			paramKeys.forEach((keys) => {
-				if (
-					keys == "pathParam" ||
-					keys == "queryParam" ||
-					keys == "cookie" ||
-					keys == "header"
-				) {
-					paramTypes.push(keys);
+		paramKeys.forEach((keys) => {
+			if (
+				keys == "pathParam" ||
+				keys == "queryParam" ||
+				keys == "cookie" ||
+				keys == "header"
+			) {
+				paramTypes.push(keys);
+			}
+		});
+
+		let requestContentType = paramAndResponse.contentType
+			? paramAndResponse.contentType
+				.replace("/", "_")
+				.replaceAll("*", "")
+			: "";
+		let responseContentType = paramAndResponse.responseContentType
+			? paramAndResponse.responseContentType
+				.replace("/", "_")
+				.replaceAll("*", "")
+			: "";
+		let fileName = `${paramAndResponse.responseStatusCode
+			? paramAndResponse.responseStatusCode
+			: "default"
+			}_${responseContentType}_${requestContentType}_${paramAndResponse.operationId
+				? paramAndResponse.operationId
+				: concatFileName(paramAndResponse.apiEndpoint)
+			}`;
+
+		openAPISpec.paramAndResponseTypedArray[index].fixtureFileName = fileName;
+		let fixtureObject = {
+			headers: {
+				"Content-Type": paramAndResponse.contentType,
+				accept: paramAndResponse.responseContentType,
+				header: "",
+			},
+			responseStatusCode: paramAndResponse.responseStatusCode,
+			responseValue: paramAndResponse.responseValue,
+			responseSchema: paramAndResponse.responseSchema ? paramAndResponse.responseSchema : ""
+		};
+		paramTypes.forEach((type) => {
+			fixtureObject[type] = {};
+			paramAndResponse[type].forEach(async (param) => {
+				if (param.type == "header") {
+					fixtureObject.headers.header = param.example
+						? param.example
+						: createExampleUsingSchema(param.schema);
+				} else {
+					fixtureObject[type][param.name] = param.example
+						? param.example
+						: createExampleUsingSchema(param.schema);
 				}
+				paramAndResponseFileNames.push(fileName);
 			});
+		});
 
-			let requestContentType = paramAndResponse.contentType
-				? paramAndResponse.contentType
-					.replace("/", "_")
-					.replaceAll("*", "")
-				: "";
-			let responseContentType = paramAndResponse.responseContentType
-				? paramAndResponse.responseContentType
-					.replace("/", "_")
-					.replaceAll("*", "")
-				: "";
-			let fileName = `${paramAndResponse.responseStatusCode
-				? paramAndResponse.responseStatusCode
-				: "default"
-				}_${responseContentType}_${requestContentType}_${paramAndResponse.operationId
-					? paramAndResponse.operationId
-					: concatFileName(paramAndResponse.apiEndpoint)
-				}`;
-
-			openAPISpec.paramAndResponseTypedArray[index].fixtureFileName = fileName;
-			let fixtureObject = {
-				headers: {
-					"Content-Type": paramAndResponse.contentType,
-					accept: paramAndResponse.responseContentType,
-					header: "",
-				},
-				responseStatusCode: paramAndResponse.responseStatusCode,
-				responseValue: paramAndResponse.responseValue,
-				responseSchema: paramAndResponse.responseSchema ? paramAndResponse.responseSchema : ""
-			};
-			paramTypes.forEach((type) => {
-				fixtureObject[type] = {};
-				paramAndResponse[type].forEach(async (param) => {
-					if (param.type == "header") {
-						fixtureObject.headers.header = param.example
-							? param.example
-							: createExampleUsingSchema(param.schema);
-					} else {
-						fixtureObject[type][param.name] = param.example
-							? param.example
-							: createExampleUsingSchema(param.schema);
-					}
-					paramAndResponseFileNames.push(fileName);
-				});
-			});
-
-			fixtureObject = addSecurityHeaders(securityHeaders, fixtureObject);
-			data = customStringify(fixtureObject);
-			if (constants.operation == "UPDATE") {
-				await doUpdateAsPerOperation(paramAndResponse.operation, fileName, data);
-			}
-			else {
-				await writeFile(`${fileName}.json`, data);
-			}
-		}
-	);
+		fixtureObject = await addSecurityHeaders(securityHeaders, fixtureObject);
+		// data = await customStringify(fixtureObject);
+		await updateOrWriteFixtureFile(paramAndResponse.operation, fileName, fixtureObject);
+	}
 
 	openAPISpec.paramAndResponseFileNames =
 		paramAndResponseFileNames;
 
 }
 
-export async function writeFixtureParam(param, fileName, parentIndex, paramTypes) {
-	let paramFileNames = [];
-	let securitySchema = getSecurityAtPathLevelOrGlobalLevel(param);
-	let securityHeaders =
-		securitySchema != "" && Object.keys(securitySchema).length > 0
-			? getSecurityHeaderWithSchma(securitySchema)
-			: "";
+
+// export async function writeFixtureParam(param, fileName, parentIndex, paramTypes) {
+// 	let paramFileNames = [];
+// 	let securitySchema = getSecurityAtPathLevelOrGlobalLevel(param);
+// 	let securityHeaders =
+// 		securitySchema != "" && Object.keys(securitySchema).length > 0
+// 			? getSecurityHeaderWithSchma(securitySchema)
+// 			: "";
 
 
 
-	let fixtureFileData = {
-		headers: {},
-		responseStatusCode: openAPISpec.paramTypesArrObjects[parentIndex]
-			.responseStatusCode
-			? openAPISpec.paramTypesArrObjects[parentIndex].responseStatusCode
-			: "",
-		responseSchema: openAPISpec.paramTypesArrObjects[parentIndex].responseSchema
-			? openAPISpec.paramTypesArrObjects[parentIndex].responseSchema
-			: "",
-		responseValue: openAPISpec.paramTypesArrObjects[parentIndex].responseValue
-			? openAPISpec.paramTypesArrObjects[parentIndex].responseValue
-			: "",
-	};
+// 	let fixtureFileData = {
+// 		headers: {},
+// 		responseStatusCode: openAPISpec.paramTypesArrObjects[parentIndex]
+// 			.responseStatusCode
+// 			? openAPISpec.paramTypesArrObjects[parentIndex].responseStatusCode
+// 			: "",
+// 		responseSchema: openAPISpec.paramTypesArrObjects[parentIndex].responseSchema
+// 			? openAPISpec.paramTypesArrObjects[parentIndex].responseSchema
+// 			: "",
+// 		responseValue: openAPISpec.paramTypesArrObjects[parentIndex].responseValue
+// 			? openAPISpec.paramTypesArrObjects[parentIndex].responseValue
+// 			: "",
+// 	};
 
-	paramTypes.forEach(async (type) => {
-		fixtureFileData[type] = {};
-		param[type].forEach((param) => {
-			if (param.type == "header") {
-				fixtureFileData.headers.header = param.example
-					? param.example
-					: createExampleUsingSchema(param.schema);
-			} else {
-				fixtureFileData[type][param.name] = param.example
-					? param.example
-					: createExampleUsingSchema(param.schema);
-			}
-		});
-	});
-
-
-	fixtureFileData = addSecurityHeaders(securityHeaders, fixtureFileData);
-
-	paramFileNames.push(fileName);
-	openAPISpec.paramTypesArrObjects[parentIndex].fixtureFileName = fileName;
-	if (constants.operation == "UPDATE") {
-		await doUpdateAsPerOperation(param.operation, fileName, data);
-	}
-	else {
-
-		await writeFile(`${fileName}.json`, customStringify(fixtureFileData));
-	}
-
-	openAPISpec.paramFixtureFileNames = paramFileNames;
+// 	paramTypes.forEach(async (type) => {
+// 		fixtureFileData[type] = {};
+// 		param[type].forEach((param) => {
+// 			if (param.type == "header") {
+// 				fixtureFileData.headers.header = param.example
+// 					? param.example
+// 					: createExampleUsingSchema(param.schema);
+// 			} else {
+// 				fixtureFileData[type][param.name] = param.example
+// 					? param.example
+// 					: createExampleUsingSchema(param.schema);
+// 			}
+// 		});
+// 	});
 
 
-}
+// 	fixtureFileData = await addSecurityHeaders(securityHeaders, fixtureFileData);
 
-function customStringify(obj, replacer = null, space = 2) {
+// 	paramFileNames.push(fileName);
+// 	openAPISpec.paramTypesArrObjects[parentIndex].fixtureFileName = fileName;
+// 	if (constants.operation == "UPDATE") {
+// 		await doUpdateAsPerOperation(param.operation, fileName, data);
+// 	}
+// 	else {
+
+// 		await writeFile(`${fileName}.json`, await customStringify(fixtureFileData));
+// 	}
+
+// 	openAPISpec.paramFixtureFileNames = paramFileNames;
+
+
+// }
+
+export async function customStringify(obj, replacer = null, space = 2) {
 	const seen = new WeakSet();
 	return JSON.stringify(
 		obj,
@@ -444,33 +812,33 @@ function customStringify(obj, replacer = null, space = 2) {
 	);
 }
 
-function addSecurityHeaders(securityHeaders, fixtureFileData) {
-	if (securityHeaders != "") {
-		switch (securityHeaders.in) {
-			case "header":
-				fixtureFileData.headers = { ...fixtureFileData.headers, ...securityHeaders.security };
-				break;
-			case "query":
-				fixtureFileData.queryParam = Object.assign(
-					fixtureFileData.queryParam,
-					securityHeaders.security
-				);
-				// Your code for handling query parameters here
-				break;
-			case "cookie":
-				fixtureFileData.cookie = Object.assign(
-					fixtureFileData.cookie,
-					securityHeaders.security
-				);
-				// Your code for handling cookies here
-				break;
-			default:
-			// console.log("Unknown request type:", requestType);
-			// Handle unknown request types here
-		}
-	}
-	return fixtureFileData;
-}
+// export async function addSecurityHeaders(securityHeaders, fixtureFileData) {
+// 	if (securityHeaders != "") {
+// 		switch (securityHeaders.in) {
+// 			case "header":
+// 				fixtureFileData.headers = { ...fixtureFileData.headers, ...securityHeaders.security };
+// 				break;
+// 			case "query":
+// 				fixtureFileData.queryParam = Object.assign(
+// 					fixtureFileData.queryParam,
+// 					securityHeaders.security
+// 				);
+// 				// Your code for handling query parameters here
+// 				break;
+// 			case "cookie":
+// 				fixtureFileData.cookie = Object.assign(
+// 					fixtureFileData.cookie,
+// 					securityHeaders.security
+// 				);
+// 				// Your code for handling cookies here
+// 				break;
+// 			default:
+// 			// console.log("Unknown request type:", requestType);
+// 			// Handle unknown request types here
+// 		}
+// 	}
+// 	return fixtureFileData;
+// }
 
 export async function createBackupForFixtures(filePath) {
 	await changeDirectory(join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`));
@@ -490,7 +858,7 @@ export async function createBackupForFixtures(filePath) {
 }
 
 
-async function doUpdateAsPerOperation(type, fileName, data) {
+export async function doUpdateAsPerOperation(type, fileName, data) {
 	const fixtureDir = join(`${constants.fullPathOfSwaggerGitProject}`, `cypress`, `fixtures`)
 	switch (type) {
 		case "UPDATE":
