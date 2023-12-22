@@ -9,15 +9,14 @@ import {
 	createDirIfDoesntExist,
 	executeGitCommand,
 	writeFileAsync,
-	readFileAsync
+	readFileAsync,
 } from "../util.js";
 import { createConfigFile } from "./cypress-config.js";
 import { createCustomCommandsConfig } from "./cypress-custom-commands-config.js";
 import { createGlobalConfigE2e } from "./cypress-global-config-e2e.js";
 import { createReportConfig } from "./cypress-report-config.js";
 import path from 'path';
-import fs from "fs";
-import { cloneRepository } from "../git-operations/git-flow.js";
+import { cloneRepository, setGitCredentialsLocally } from "../git-operations/git-flow.js";
 
 export async function createFolders(folders, parentDirectory) {
 	await folders.forEach(async (folderName) => {
@@ -29,45 +28,20 @@ export async function createFolders(folders, parentDirectory) {
 
 export async function createCypressFolderStructure() {
 	try {
-		const gitUserName = process.env.GIT_USER_NAME;
-		const githubToken = process.env.GITHUB_TOKEN;
-		const command = `git config --local credential.helper '!f() { echo "username=${gitUserName}"; echo "password=${githubToken}"; }; f'`;
 		if (constants.operation == "CREATE") {
 			await createDirIfDoesntExist(constants.projectPath);
 			await removeFolder(constants.repoName);
 			await cloneRepository();
 			await changeDirectory(constants.repoName);
-			await executeGitCommand(`git config --local user.name "${process.env.GIT_USER_NAME}"`);
-			await executeGitCommand(`git config --local user.email "${process.env.GIT_USER}"`);
-			console.log(await process.cwd());
-			// await executeCommandInCli(`chmod 777 /home/sbx_user1051/.gitconfig`);
-			// await executeGitCommand(`git config credential.helper '!f() {echo "username=${process.env.GIT_USER_NAME}"; echo "password=${process.env.GITHUB_TOKEN}"; }; f'`);
-			await executeGitCommand(command, { stdio: 'inherit' });
-
-
+			await setGitCredentialsLocally();
 			await executeGitCommand(`git checkout -b ${constants.branchName} ${constants.masterBranchName}`, `New branch "${constants.branchName}" created.`);
-			await executeCommandInCli(constants.npmPackage, { stdio: "inherit" });
-			// await executeCommandInCli(constants.cypressPackage, { stdio: "inherit" });
-			// await executeCommandInCli(constants.ajyPackage, { stdio: "inherit" });
-			// await executeCommandInCli(constants.pretteierPackage, {
-			// 	stdio: "inherit",
-			// });
-			// await executeCommandInCli(constants.reportingPackages, {
-			// 	stdio: "inherit",
-			// });
 			await writeFile(".prettierrc.json", constants.pretteierConfig);
 			const packageJsonPath = path.join(process.cwd(), 'package.json');
 			await readAndWriteFile(packageJsonPath);
 			console.log(`Cypress project initialized successfully `);
-			await createDirectory("cypress");
-			await createConfigFile();
-			await createReportConfig();
-			await changeDirectory("cypress");
-			await createFolders(
-				constants.cypressFoldersName,
-				constants.cypressParentDirectory
-			);
-			await changeDirectory("./support");
+			// await createConfigFile();
+			// await createReportConfig();
+			await changeDirectory("./cypress/support");
 			await createCustomCommandsConfig();
 			await createGlobalConfigE2e();
 			await changeDirectory("../e2e");
@@ -79,10 +53,7 @@ export async function createCypressFolderStructure() {
 			await removeFolder(constants.repoName);
 			await cloneRepository();
 			await changeDirectory(constants.repoName);
-			await executeGitCommand(`git config --local user.name "${process.env.GIT_USER_NAME}"`);
-			await executeGitCommand(`git config --local user.email "${process.env.GIT_USER}"`);
-			// await executeCommandInCli(`chmod 777 /home/sbx_user1051/.gitconfig`);
-			await executeGitCommand(command, { stdio: 'inherit' });
+			await setGitCredentialsLocally();
 			await executeGitCommand(`git checkout -b ${constants.branchName} ${constants.masterBranchName}`, `New branch "${constants.branchName}" created.`);
 			const packageJsonPath = path.join(process.cwd(), 'package.json');
 			await readAndWriteFile(packageJsonPath);
